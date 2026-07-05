@@ -1,0 +1,16 @@
+{
+  "name": "OMSF Site",
+  "short_name": "OMSF Site",
+  "description": "Good Spot / Hazard Reporting for OMSF - Ontario Line",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1c1917",
+  "theme_color": "#1c1917",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
