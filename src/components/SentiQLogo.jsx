@@ -1,16 +1,14 @@
 import React from "react";
 
-/* SentiQ badge logo — now using the real logo artwork (public/logo-icon.png)
-   instead of a hand-coded SVG recreation, so it matches exactly. */
+/* SentiQ badge logo — shows the full uploaded artwork with no cropping.
+   object-contain + auto height so nothing is ever cut off, at any size. */
 export default function SentiQLogo({ size = 140, className = "" }) {
   return (
     <img
       src="/logo-icon.png"
       alt="SentiQ"
-      width={size}
-      height={size}
-      className={`rounded-full object-cover ${className}`}
-      style={{ width: size, height: size }}
+      className={`object-contain ${className}`}
+      style={{ width: size, height: "auto" }}
     />
   );
 }
