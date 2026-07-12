@@ -11,7 +11,7 @@ export default function BackgroundWatermark() {
       style={{ zIndex: 0 }}
       aria-hidden="true"
     >
-      <div style={{ opacity: 0.32, transform: "scale(2.2)", imageRendering: "crisp-edges" }}>
+      <div style={{ opacity: 0.20, transform: "scale(2.2)", imageRendering: "crisp-edges" }}>
         <SentiQLogo size={360} />
       </div>
     </div>
