@@ -25,27 +25,27 @@ export default function SendPromptView({ profile, pendingSendReport, setPendingS
   }
 
   return (
-    <div className="min-h-screen bg-stone-100 font-sans flex flex-col">
+    <div className="min-h-screen bg-[#050b14] font-sans flex flex-col">
       <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center px-6 py-10 text-center">
-        <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 flex items-center justify-center mb-5">
-          <Check size={28} className="text-emerald-600" />
+        <div className="w-16 h-16 mx-auto rounded-full bg-emerald-500/15 flex items-center justify-center mb-5">
+          <Check size={28} className="text-emerald-400" />
         </div>
-        <h1 className="text-xl font-bold text-stone-800 mb-2">Report saved</h1>
-        <p className="text-sm text-stone-500 mb-6">
+        <h1 className="text-xl font-bold text-white mb-2">Report saved</h1>
+        <p className="text-sm text-slate-400 mb-6">
           Send it to the safety manager now? Your mail app will open with everything pre-filled.
         </p>
 
-        <div className="bg-white rounded-xl border border-stone-200 p-4 text-left mb-6 space-y-3">
+        <div className="bg-[#0b1522] rounded-xl border border-slate-800 p-4 text-left mb-6 space-y-3">
           <div>
-            <div className="text-xs font-semibold text-stone-400 uppercase tracking-wide mb-1">Base Distribution List</div>
-            <div className="text-sm text-stone-700 break-words">{profile.distribution_list || "—"}</div>
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Base Distribution List</div>
+            <div className="text-sm text-slate-200 break-words">{profile.distribution_list || "—"}</div>
           </div>
           {matchedSub && (
             <div>
-              <div className="text-xs font-semibold text-stone-400 uppercase tracking-wide mb-1">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
                 Also notifying: {matchedSub.name}
               </div>
-              <div className="text-sm text-stone-700 break-words">
+              <div className="text-sm text-slate-200 break-words">
                 {(matchedSub.contact_emails || []).join(", ") || "No emails on file"}
               </div>
             </div>
@@ -58,7 +58,7 @@ export default function SendPromptView({ profile, pendingSendReport, setPendingS
         >
           <Send size={18} /> Open Email to Send
         </button>
-        <button onClick={skip} className="w-full text-stone-500 font-medium py-2 text-sm">
+        <button onClick={skip} className="w-full text-slate-400 font-medium py-2 text-sm">
           Skip for now
         </button>
       </div>

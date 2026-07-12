@@ -6,7 +6,7 @@ function RiskBar({ riskRatingKey }) {
   if (!riskRatingKey) return null;
   const info = riskBarInfo(riskRatingKey);
   return (
-    <div className="rounded-xl overflow-hidden border border-stone-200">
+    <div className="rounded-xl overflow-hidden border border-slate-800">
       <div className="px-4 py-2.5 flex items-center justify-between text-white font-bold text-sm tracking-wide" style={{ backgroundColor: info.color }}>
         <span>{info.barLabel}</span>
         <span className="font-semibold text-xs opacity-90">{riskRatingKey}</span>
@@ -222,27 +222,27 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
   }
 
   return (
-    <div className="min-h-screen bg-stone-100 font-sans">
+    <div className="min-h-screen bg-[#050b14] font-sans">
       <div className="max-w-md mx-auto pb-10">
-        <header className="sticky top-0 bg-white border-b border-stone-200 px-4 py-3 flex items-center gap-3 z-10">
-          <button onClick={() => setView("log")} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100">
+        <header className="sticky top-0 bg-[#0b1522] border-b border-slate-800 px-4 py-3 flex items-center gap-3 z-10">
+          <button onClick={() => setView("log")} className="p-1.5 -ml-1.5 rounded-full hover:bg-slate-800 text-slate-300">
             <ChevronLeft size={22} />
           </button>
-          <h1 className="font-semibold text-stone-800">Report Details</h1>
+          <h1 className="font-semibold text-white">Report Details</h1>
         </header>
 
         <div className="p-4 space-y-5">
-          {r.photo_data_url && <img src={r.photo_data_url} className="w-full h-56 object-cover rounded-xl border border-stone-200" />}
+          {r.photo_data_url && <img src={r.photo_data_url} className="w-full h-56 object-cover rounded-xl border border-slate-800" />}
           <RiskBar riskRatingKey={r.risk_rating} />
           {r.map_pin && r.site_map_snapshot && (
-            <div className="relative rounded-xl overflow-hidden border border-stone-200">
+            <div className="relative rounded-xl overflow-hidden border border-slate-800">
               <img src={r.site_map_snapshot} className="w-full h-32 object-cover" />
               <div className="absolute -translate-x-1/2 -translate-y-full pointer-events-none" style={{ left: `${r.map_pin.x * 100}%`, top: `${r.map_pin.y * 100}%` }}>
                 <MapPin size={24} className="text-red-600 drop-shadow-md" fill="#dc2626" strokeWidth={1.5} />
               </div>
             </div>
           )}
-          <div className="bg-white rounded-xl border border-stone-200 px-4 py-1">
+          <div className="bg-[#0b1522] rounded-xl border border-slate-800 px-4 py-1">
             {[
               ["Type", r.report_type],
               ["Location", `${r.project} — ${r.location}`],
@@ -255,9 +255,9 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
               ["Corrective Action", r.corrective_action],
               ["Preventative Action", r.preventative_action],
             ].map(([label, value]) => value ? (
-              <div key={label} className="py-2 border-b border-stone-100 last:border-0">
-                <div className="text-xs font-semibold text-stone-400 uppercase tracking-wide">{label}</div>
-                <div className="text-sm text-stone-800 mt-0.5 whitespace-pre-wrap">{value}</div>
+              <div key={label} className="py-2 border-b border-slate-800 last:border-0">
+                <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{label}</div>
+                <div className="text-sm text-white mt-0.5 whitespace-pre-wrap">{value}</div>
               </div>
             ) : null)}
           </div>
@@ -273,7 +273,7 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
               </button>
             )}
             {r.author_id === profile.id && (
-              <button onClick={() => { deleteReport(r.id); setView("log"); }} className="bg-red-50 hover:bg-red-100 text-red-600 font-semibold px-4 rounded-xl flex items-center justify-center">
+              <button onClick={() => { deleteReport(r.id); setView("log"); }} className="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-semibold px-4 rounded-xl flex items-center justify-center">
                 <Trash2 size={18} />
               </button>
             )}

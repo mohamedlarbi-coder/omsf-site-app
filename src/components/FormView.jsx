@@ -13,8 +13,8 @@ const STEPS = ["Photo", "Type & Location", "Site Map", "Description", "Classific
 function SectionTitle({ children, icon: Icon }) {
   return (
     <div className="flex items-center gap-2 mb-4">
-      {Icon && <Icon size={18} className="text-teal-600" />}
-      <h2 className="text-[15px] font-semibold tracking-wide text-stone-800 uppercase">{children}</h2>
+      {Icon && <Icon size={18} className="text-teal-400" />}
+      <h2 className="text-[15px] font-semibold tracking-wide text-white uppercase">{children}</h2>
     </div>
   );
 }
@@ -22,15 +22,15 @@ function SectionTitle({ children, icon: Icon }) {
 function TextField({ label, value, onChange, placeholder, type = "text", required }) {
   return (
     <label className="block">
-      <span className="text-xs font-semibold text-stone-500 uppercase tracking-wide">
-        {label} {required && <span className="text-teal-600">*</span>}
+      <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+        {label} {required && <span className="text-teal-400">*</span>}
       </span>
       <input
         type={type}
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2.5 text-[15px] text-stone-800 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
+        className="mt-1 w-full rounded-lg border border-slate-700 bg-[#050b14] px-3 py-2.5 text-[15px] text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
       />
     </label>
   );
@@ -39,15 +39,15 @@ function TextField({ label, value, onChange, placeholder, type = "text", require
 function TextArea({ label, value, onChange, placeholder, required, rows = 4 }) {
   return (
     <label className="block">
-      <span className="text-xs font-semibold text-stone-500 uppercase tracking-wide">
-        {label} {required && <span className="text-teal-600">*</span>}
+      <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+        {label} {required && <span className="text-teal-400">*</span>}
       </span>
       <textarea
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2.5 text-[15px] text-stone-800 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
+        className="mt-1 w-full rounded-lg border border-slate-700 bg-[#050b14] px-3 py-2.5 text-[15px] text-white placeholder:text-slate-600 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
       />
     </label>
   );
@@ -59,9 +59,9 @@ function CheckPill({ label, active, onClick }) {
       type="button"
       onClick={onClick}
       className={`px-3 py-2 rounded-lg border text-sm font-medium transition-all text-left flex items-center gap-2
-        ${active ? "bg-teal-500 border-teal-500 text-white shadow-sm" : "bg-white border-stone-300 text-stone-700 hover:border-teal-400"}`}
+        ${active ? "bg-teal-500 border-teal-500 text-white shadow-sm" : "bg-[#0b1522] border-slate-700 text-slate-200 hover:border-teal-400"}`}
     >
-      <span className={`flex items-center justify-center w-4 h-4 rounded border shrink-0 ${active ? "bg-white border-white" : "border-stone-400"}`}>
+      <span className={`flex items-center justify-center w-4 h-4 rounded border shrink-0 ${active ? "bg-white border-white" : "border-slate-600"}`}>
         {active && <Check size={12} strokeWidth={3} className="text-teal-500" />}
       </span>
       {label}
@@ -83,7 +83,7 @@ function RiskBar({ riskRatingKey }) {
   if (!riskRatingKey) return null;
   const info = riskBarInfo(riskRatingKey);
   return (
-    <div className="rounded-xl overflow-hidden border border-stone-200">
+    <div className="rounded-xl overflow-hidden border border-slate-800">
       <div className="px-4 py-2.5 flex items-center justify-between text-white font-bold text-sm tracking-wide" style={{ backgroundColor: info.color }}>
         <span>{info.barLabel}</span>
         <span className="font-semibold text-xs opacity-90">{riskRatingKey}</span>
@@ -113,7 +113,7 @@ function PhotoCapture({ photoDataUrl, onCapture, onClear }) {
 
   if (compressing) {
     return (
-      <div className="w-full h-64 rounded-xl border border-stone-200 bg-stone-50 flex flex-col items-center justify-center gap-2 text-stone-400">
+      <div className="w-full h-64 rounded-xl border border-slate-800 bg-[#050b14] flex flex-col items-center justify-center gap-2 text-slate-500">
         <Loader2 size={22} className="animate-spin" />
         <span className="text-sm font-medium">Optimizing photo…</span>
       </div>
@@ -122,7 +122,7 @@ function PhotoCapture({ photoDataUrl, onCapture, onClear }) {
 
   if (photoDataUrl) {
     return (
-      <div className="relative rounded-xl overflow-hidden border border-stone-300 bg-stone-100">
+      <div className="relative rounded-xl overflow-hidden border border-slate-700 bg-slate-800">
         <img src={photoDataUrl} alt="Site condition" className="w-full h-64 object-cover" />
         <button onClick={onClear} className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white rounded-full p-1.5">
           <X size={16} />
@@ -136,22 +136,22 @@ function PhotoCapture({ photoDataUrl, onCapture, onClear }) {
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFile} className="hidden" />
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
       <div className="grid grid-cols-2 gap-3">
-        <button onClick={() => cameraInputRef.current?.click()} className="h-40 rounded-xl border-2 border-dashed border-stone-300 bg-stone-50 flex flex-col items-center justify-center gap-2 text-stone-500 hover:border-teal-400 hover:bg-teal-50/50 transition-colors">
-          <div className="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center">
-            <Camera size={22} className="text-teal-600" />
+        <button onClick={() => cameraInputRef.current?.click()} className="h-40 rounded-xl border-2 border-dashed border-slate-700 bg-[#050b14] flex flex-col items-center justify-center gap-2 text-slate-400 hover:border-teal-400 hover:bg-teal-500/5 transition-colors">
+          <div className="w-12 h-12 rounded-full bg-teal-500/15 flex items-center justify-center">
+            <Camera size={22} className="text-teal-400" />
           </div>
           <div className="text-center px-2">
-            <div className="font-semibold text-stone-700 text-sm">Take photo</div>
-            <div className="text-xs text-stone-400 mt-0.5">Use camera</div>
+            <div className="font-semibold text-slate-200 text-sm">Take photo</div>
+            <div className="text-xs text-slate-500 mt-0.5">Use camera</div>
           </div>
         </button>
-        <button onClick={() => fileInputRef.current?.click()} className="h-40 rounded-xl border-2 border-dashed border-stone-300 bg-stone-50 flex flex-col items-center justify-center gap-2 text-stone-500 hover:border-teal-400 hover:bg-teal-50/50 transition-colors">
-          <div className="w-12 h-12 rounded-full bg-stone-200 flex items-center justify-center">
-            <ImageIcon size={22} className="text-stone-600" />
+        <button onClick={() => fileInputRef.current?.click()} className="h-40 rounded-xl border-2 border-dashed border-slate-700 bg-[#050b14] flex flex-col items-center justify-center gap-2 text-slate-400 hover:border-teal-400 hover:bg-teal-500/5 transition-colors">
+          <div className="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center">
+            <ImageIcon size={22} className="text-slate-300" />
           </div>
           <div className="text-center px-2">
-            <div className="font-semibold text-stone-700 text-sm">Attach photo</div>
-            <div className="text-xs text-stone-400 mt-0.5">From gallery / files</div>
+            <div className="font-semibold text-slate-200 text-sm">Attach photo</div>
+            <div className="text-xs text-slate-500 mt-0.5">From gallery / files</div>
           </div>
         </button>
       </div>
@@ -173,11 +173,11 @@ function SiteMapPicker({ siteMapUrl, pin, onPinChange, gpsStatus }) {
 
   if (!siteMapUrl) {
     return (
-      <div className="w-full h-44 rounded-xl border-2 border-dashed border-stone-300 bg-stone-50 flex flex-col items-center justify-center gap-2 text-stone-400">
+      <div className="w-full h-44 rounded-xl border-2 border-dashed border-slate-700 bg-[#050b14] flex flex-col items-center justify-center gap-2 text-slate-500">
         <MapPin size={26} />
         <div className="text-center px-4">
-          <div className="font-semibold text-stone-700 text-sm">No site map uploaded yet</div>
-          <div className="text-xs text-stone-400 mt-0.5">Add one from Settings</div>
+          <div className="font-semibold text-slate-200 text-sm">No site map uploaded yet</div>
+          <div className="text-xs text-slate-500 mt-0.5">Add one from Settings</div>
         </div>
       </div>
     );
@@ -185,7 +185,7 @@ function SiteMapPicker({ siteMapUrl, pin, onPinChange, gpsStatus }) {
 
   return (
     <div className="space-y-2">
-      <div className="relative rounded-xl overflow-hidden border border-stone-300 select-none touch-none cursor-crosshair" onClick={handleTap}>
+      <div className="relative rounded-xl overflow-hidden border border-slate-700 select-none touch-none cursor-crosshair" onClick={handleTap}>
         <img ref={imgRef} src={siteMapUrl} alt="Site map" className="w-full h-auto block" draggable={false} />
         {pin && (
           <div className="absolute -translate-x-1/2 -translate-y-full pointer-events-none" style={{ left: `${pin.x * 100}%`, top: `${pin.y * 100}%` }}>
@@ -194,9 +194,9 @@ function SiteMapPicker({ siteMapUrl, pin, onPinChange, gpsStatus }) {
         )}
       </div>
       <div className="flex items-center justify-between text-xs">
-        <span className="text-stone-400">{pin ? "Tap the map to move the pin" : "Tap the map to mark the exact spot"}</span>
-        {gpsStatus === "locating" && <span className="text-teal-600 flex items-center gap-1"><Loader2 size={12} className="animate-spin" /> Locating…</span>}
-        {gpsStatus === "located" && <span className="text-emerald-600">GPS pin placed — adjust if needed</span>}
+        <span className="text-slate-500">{pin ? "Tap the map to move the pin" : "Tap the map to mark the exact spot"}</span>
+        {gpsStatus === "locating" && <span className="text-teal-400 flex items-center gap-1"><Loader2 size={12} className="animate-spin" /> Locating…</span>}
+        {gpsStatus === "located" && <span className="text-emerald-400">GPS pin placed — adjust if needed</span>}
       </div>
     </div>
   );
@@ -284,18 +284,18 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
                 <TextField label="Report Date" type="date" value={draft.report_date} onChange={(v) => setDraft({ ...draft, report_date: v })} />
               </div>
               <label className="block">
-                <span className="text-xs font-semibold text-stone-500 uppercase tracking-wide">Report To (Subcontractor)</span>
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Report To (Subcontractor)</span>
                 <select
                   value={draft.action_report_to || ""}
                   onChange={(e) => setDraft({ ...draft, action_report_to: e.target.value })}
-                  className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2.5 text-[15px] text-stone-800 bg-white focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
+                  className="mt-1 w-full rounded-lg border border-slate-700 px-3 py-2.5 text-[15px] text-white bg-[#0b1522] focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
                 >
                   <option value="">— Select —</option>
                   {subcontractors.map((s) => (
                     <option key={s.id} value={s.name}>{s.name}</option>
                   ))}
                 </select>
-                <p className="text-xs text-stone-400 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   Their contact emails will be added automatically alongside your base distribution list.
                   {subcontractors.length === 0 && " No subcontractors added yet — add them in Settings → Subcontractor Contacts."}
                 </p>
@@ -308,7 +308,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
           <div className="space-y-5">
             <SectionTitle icon={MapPin}>Mark the Location</SectionTitle>
             {!draft.gps && gpsStatus !== "locating" && (
-              <button onClick={locateGps} className="w-full flex items-center justify-center gap-2 bg-teal-50 border border-teal-200 text-teal-700 font-semibold text-sm py-2.5 rounded-xl">
+              <button onClick={locateGps} className="w-full flex items-center justify-center gap-2 bg-[#0b1522] border border-teal-500/30 text-teal-400 font-semibold text-sm py-2.5 rounded-xl">
                 <MapPin size={16} /> Use my current GPS location
               </button>
             )}
@@ -339,9 +339,9 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
               <div className="space-y-2">
                 {RISK_RATINGS.map((r) => (
                   <button key={r.key} onClick={() => setDraft({ ...draft, risk_rating: r.key })}
-                    className={`w-full text-left rounded-lg border px-3 py-2.5 transition-all ${draft.risk_rating === r.key ? "bg-teal-500 border-teal-500 text-white" : "bg-white border-stone-300 hover:border-teal-400"}`}>
+                    className={`w-full text-left rounded-lg border px-3 py-2.5 transition-all ${draft.risk_rating === r.key ? "bg-teal-500 border-teal-500 text-white" : "bg-[#0b1522] border-slate-700 text-slate-200 hover:border-teal-400"}`}>
                     <div className="font-semibold text-sm">{r.label}</div>
-                    <div className={`text-xs ${draft.risk_rating === r.key ? "text-teal-50" : "text-stone-400"}`}>{r.sub}</div>
+                    <div className={`text-xs ${draft.risk_rating === r.key ? "text-teal-50" : "text-slate-500"}`}>{r.sub}</div>
                   </button>
                 ))}
               </div>
@@ -382,8 +382,8 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
         return (
           <div className="space-y-4">
             <RiskBar riskRatingKey={draft.risk_rating} />
-            {draft.photo_data_url && <img src={draft.photo_data_url} className="w-full h-48 object-cover rounded-xl border border-stone-200" />}
-            <div className="bg-white rounded-xl border border-stone-200 px-4 py-1">
+            {draft.photo_data_url && <img src={draft.photo_data_url} className="w-full h-48 object-cover rounded-xl border border-slate-800" />}
+            <div className="bg-[#0b1522] rounded-xl border border-slate-800 px-4 py-1">
               {[
                 ["Type", draft.report_type],
                 ["Location", `${draft.project} — ${draft.location}`],
@@ -394,9 +394,9 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
                 ["Corrective Action", draft.corrective_action],
                 ["Preventative Action", draft.preventative_action],
               ].map(([label, value]) => value ? (
-                <div key={label} className="py-2 border-b border-stone-100 last:border-0">
-                  <div className="text-xs font-semibold text-stone-400 uppercase tracking-wide">{label}</div>
-                  <div className="text-sm text-stone-800 mt-0.5 whitespace-pre-wrap">{value}</div>
+                <div key={label} className="py-2 border-b border-slate-800 last:border-0">
+                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{label}</div>
+                  <div className="text-sm text-white mt-0.5 whitespace-pre-wrap">{value}</div>
                 </div>
               ) : null)}
             </div>
@@ -408,26 +408,26 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
   }
 
   return (
-    <div className="min-h-screen bg-stone-100 font-sans">
+    <div className="min-h-screen bg-[#050b14] font-sans">
       <div className="max-w-md mx-auto pb-28">
-        <header className="sticky top-0 bg-white border-b border-stone-200 px-4 py-3 z-10">
+        <header className="sticky top-0 bg-[#0b1522] border-b border-slate-800 px-4 py-3 z-10">
           <div className="flex items-center gap-3 mb-3">
-            <button onClick={() => setView("log")} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100">
+            <button onClick={() => setView("log")} className="p-1.5 -ml-1.5 rounded-full hover:bg-slate-800 text-slate-300">
               <X size={20} />
             </button>
-            <h1 className="font-semibold text-stone-800">{STEPS[step]}</h1>
-            <span className="ml-auto text-xs text-stone-400 font-medium">{step + 1} / {STEPS.length}</span>
+            <h1 className="font-semibold text-white">{STEPS[step]}</h1>
+            <span className="ml-auto text-xs text-slate-500 font-medium">{step + 1} / {STEPS.length}</span>
           </div>
-          <div className="h-1.5 w-full bg-stone-100 rounded-full overflow-hidden">
+          <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
             <div className="h-full bg-teal-500 rounded-full transition-all duration-300" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
           </div>
         </header>
         <div className="p-4">{renderStep()}</div>
       </div>
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 p-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-[#0b1522] border-t border-slate-800 p-4">
         <div className="max-w-md mx-auto flex gap-3">
           {step > 0 && (
-            <button onClick={() => setStep(step - 1)} className="px-4 py-3 rounded-xl border border-stone-300 text-stone-600 font-semibold flex items-center gap-1">
+            <button onClick={() => setStep(step - 1)} className="px-4 py-3 rounded-xl border border-slate-700 text-slate-300 font-semibold flex items-center gap-1">
               <ChevronLeft size={18} /> Back
             </button>
           )}
