@@ -15,7 +15,7 @@ function RiskBar({ riskRatingKey }) {
   );
 }
 
-export default function DetailView({ profile, activeReport, setView, deleteReport, showToast }) {
+export default function DetailView({ profile, activeReport, setView, deleteReport, showToast, subcontractors = [] }) {
   const [exporting, setExporting] = useState(false);
   const r = activeReport;
   if (!r) {
@@ -24,7 +24,7 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
   }
 
   function sendEmail() {
-    const link = buildReportEmail(r, profile);
+    const link = buildReportEmail(r, profile, subcontractors);
     window.open(link, "_blank");
   }
 
@@ -145,10 +145,19 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
         rows: [
           new TableRow({ children: [valueCell(["Corrective Action:", r.corrective_action], { width: 4680 }), labelCell("Photo: (as required)", { width: 2340 }), labelCell("Close Out Date: " + (r.corrective_close_out_date || ""), { width: 2340 })] }),
           new TableRow({ children: [labelCell("Action Owner: " + (r.corrective_action_owner || ""), { width: 9360, span: 3 })] }),
+        ],
+      });
+
+      const preventativeTable = new Table({
+        width: { size: FULL_WIDTH, type: WidthType.DXA },
+        columnWidths: [4680, 2340, 2340],
+        rows: [
           new TableRow({ children: [valueCell(["Preventative Action:", r.preventative_action], { width: 4680 }), labelCell("Photo: (as required)", { width: 2340 }), labelCell("Close Out Date: " + (r.preventative_close_out_date || ""), { width: 2340 })] }),
           new TableRow({ children: [labelCell("Action Owner: " + (r.preventative_action_owner || ""), { width: 9360, span: 3 })] }),
         ],
       });
+
+      const pageBreakParagraph = new Paragraph({ pageBreakBefore: true, children: [new TextRun({ text: "" })] });
 
       const footerTable = new Table({
         width: { size: FULL_WIDTH, type: WidthType.DXA },
@@ -176,16 +185,18 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
           properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 720, right: 720, bottom: 720, left: 720 } } },
           children: [
             title, headerTable, typeRow,
-            ...(riskBarTable ? [riskBarTable, new Paragraph({ spacing: { before: 120 }, children: [] })] : []),
+            ...(riskBarTable ? [riskBarTable, new Paragraph({ spacing: { before: 120 }, children: [new TextRun({ text: "" })] })] : []),
             obsTable,
             ...(siteMapParagraph ? [sectionHeading("Site Map — Marked Location"), siteMapParagraph] : []),
             sectionHeading("Hazard Classification"), ...checklistParagraph(HAZARD_CLASSES, r.hazard_classes || [], r.hazard_class_other),
             sectionHeading("Tracking Type"), ...checklistParagraph(TRACKING_TYPES, r.tracking_types || [], r.tracking_type_other),
             sectionHeading("Risk Rating"), riskLine,
             sectionHeading("Contributing Factors"), ...checklistParagraph(CONTRIBUTING_FACTORS, r.contributing_factors || [], r.contributing_factor_other),
-            new Paragraph({ spacing: { before: 200 }, children: [] }),
+            new Paragraph({ spacing: { before: 200 }, children: [new TextRun({ text: "" })] }),
             correctiveTable,
-            new Paragraph({ spacing: { before: 160 }, children: [] }),
+            pageBreakParagraph,
+            preventativeTable,
+            new Paragraph({ spacing: { before: 160 }, children: [new TextRun({ text: "" })] }),
             footerTable, definitions, footerNote, appCredit,
           ],
         }],
@@ -257,7 +268,7 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
               {exporting ? "Generating…" : "Word"}
             </button>
             {profile.distribution_list && (
-              <button onClick={sendEmail} className="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2">
+              <button onClick={sendEmail} className="flex-1 bg-teal-500 hover:bg-teal-600 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2">
                 <Send size={18} /> Email
               </button>
             )}

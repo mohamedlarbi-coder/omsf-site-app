@@ -1,11 +1,11 @@
 {
-  "name": "OMSF Site",
-  "short_name": "OMSF Site",
-  "description": "Good Spot / Hazard Reporting for OMSF - Ontario Line",
+  "name": "SentiQ",
+  "short_name": "SentiQ",
+  "description": "Observe. Share. Prevent. Improve. Safety observation platform for OMSF - Ontario Line",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1c1917",
-  "theme_color": "#1c1917",
+  "background_color": "#050b14",
+  "theme_color": "#050b14",
   "icons": [
     {
       "src": "/icon.png",

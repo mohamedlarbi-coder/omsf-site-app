@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "./supabaseClient";
 import LoginScreen from "./components/LoginScreen";
+import WelcomeScreen from "./components/WelcomeScreen";
 import LogView from "./components/LogView";
 import FormView from "./components/FormView";
 import DetailView from "./components/DetailView";
 import SettingsView from "./components/SettingsView";
 import StatsView from "./components/StatsView";
+import SendPromptView from "./components/SendPromptView";
+import ContactsView from "./components/ContactsView";
+import OnboardingView from "./components/OnboardingView";
 import { Loader2 } from "lucide-react";
 
 export default function App() {
@@ -14,10 +18,13 @@ export default function App() {
   const [view, setView] = useState("log");
   const [reports, setReports] = useState([]);
   const [profiles, setProfiles] = useState([]);
+  const [subcontractors, setSubcontractors] = useState([]);
   const [siteMapUrl, setSiteMapUrl] = useState(null);
   const [activeReport, setActiveReport] = useState(null);
+  const [pendingSendReport, setPendingSendReport] = useState(null);
   const [loadingData, setLoadingData] = useState(true);
   const [toast, setToast] = useState(null);
+  const [authScreen, setAuthScreen] = useState("welcome"); // "welcome" | "login" | "signup" (pre-session only)
 
   function showToast(msg) {
     setToast(msg);
@@ -41,8 +48,14 @@ export default function App() {
     if (!session) return;
     (async () => {
       setLoadingData(true);
-      await Promise.all([loadMyProfile(), loadAllProfiles(), loadReports(), loadSiteMap()]);
+      const myProfile = await loadMyProfile();
+      await Promise.all([loadAllProfiles(), loadReports(), loadSiteMap(), loadSubcontractors()]);
       setLoadingData(false);
+      // First-time onboarding: every user needs a base distribution list
+      // set up so the app knows where their reports should be routed.
+      if (myProfile && !myProfile.distribution_list) {
+        setView("onboarding");
+      }
     })();
   }, [session]);
 
@@ -52,7 +65,11 @@ export default function App() {
       .select("*")
       .eq("id", session.user.id)
       .single();
-    if (!error) setProfile(data);
+    if (!error) {
+      setProfile(data);
+      return data;
+    }
+    return null;
   }
 
   async function loadAllProfiles() {
@@ -71,6 +88,39 @@ export default function App() {
   async function loadSiteMap() {
     const { data, error } = await supabase.from("site_map").select("*").eq("id", 1).single();
     if (!error) setSiteMapUrl(data?.image_data_url || null);
+  }
+
+  async function loadSubcontractors() {
+    const { data, error } = await supabase.from("subcontractors").select("*").order("name");
+    if (!error) setSubcontractors(data || []);
+  }
+
+  async function addSubcontractor(name, contactEmails) {
+    const { error } = await supabase.from("subcontractors").insert({ name, contact_emails: contactEmails });
+    if (!error) {
+      await loadSubcontractors();
+      showToast("Contact added");
+    } else {
+      showToast("Failed to add contact");
+    }
+  }
+
+  async function updateSubcontractor(id, updates) {
+    const { error } = await supabase.from("subcontractors").update(updates).eq("id", id);
+    if (!error) {
+      await loadSubcontractors();
+      showToast("Contact updated");
+    } else {
+      showToast("Failed to update contact");
+    }
+  }
+
+  async function deleteSubcontractor(id) {
+    const { error } = await supabase.from("subcontractors").delete().eq("id", id);
+    if (!error) {
+      await loadSubcontractors();
+      showToast("Contact removed");
+    }
   }
 
   async function handleUploadSiteMap(dataUrl) {
@@ -123,28 +173,38 @@ export default function App() {
 
   if (session === undefined) {
     return (
-      <div className="min-h-screen bg-stone-900 flex items-center justify-center">
-        <Loader2 size={28} className="text-violet-500 animate-spin" />
+      <div className="min-h-screen bg-[#050b14] flex items-center justify-center">
+        <Loader2 size={28} className="text-teal-400 animate-spin" />
       </div>
     );
   }
 
   if (!session) {
-    return <LoginScreen />;
+    if (authScreen === "welcome") {
+      return (
+        <WelcomeScreen
+          onGetStarted={() => setAuthScreen("signup")}
+          onSignIn={() => setAuthScreen("login")}
+        />
+      );
+    }
+    return <LoginScreen initialMode={authScreen} onBack={() => setAuthScreen("welcome")} />;
   }
 
   if (loadingData || !profile) {
     return (
-      <div className="min-h-screen bg-stone-900 flex items-center justify-center">
-        <Loader2 size={28} className="text-violet-500 animate-spin" />
+      <div className="min-h-screen bg-[#050b14] flex items-center justify-center">
+        <Loader2 size={28} className="text-teal-400 animate-spin" />
       </div>
     );
   }
 
   const commonProps = {
     session, profile, profiles, reports, siteMapUrl,
+    subcontractors, addSubcontractor, updateSubcontractor, deleteSubcontractor,
     showToast, setView, view,
     activeReport, setActiveReport,
+    pendingSendReport, setPendingSendReport,
     saveReport, deleteReport, updateMyProfile, handleUploadSiteMap, handleLogout,
     reloadReports: loadReports,
   };
@@ -152,15 +212,18 @@ export default function App() {
   return (
     <>
       {toast && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-stone-900 text-white text-sm font-medium px-4 py-2.5 rounded-full shadow-lg z-50">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-[#0b1522] border border-teal-500/30 text-white text-sm font-medium px-4 py-2.5 rounded-full shadow-lg z-50">
           {toast}
         </div>
       )}
+      {view === "onboarding" && <OnboardingView {...commonProps} />}
       {view === "log" && <LogView {...commonProps} />}
       {view === "form" && <FormView {...commonProps} />}
       {view === "detail" && <DetailView {...commonProps} />}
       {view === "settings" && <SettingsView {...commonProps} />}
       {view === "stats" && <StatsView {...commonProps} />}
+      {view === "send" && <SendPromptView {...commonProps} />}
+      {view === "contacts" && <ContactsView {...commonProps} />}
     </>
   );
 }

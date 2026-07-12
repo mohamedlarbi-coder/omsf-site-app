@@ -13,7 +13,7 @@ const STEPS = ["Photo", "Type & Location", "Site Map", "Description", "Classific
 function SectionTitle({ children, icon: Icon }) {
   return (
     <div className="flex items-center gap-2 mb-4">
-      {Icon && <Icon size={18} className="text-amber-600" />}
+      {Icon && <Icon size={18} className="text-teal-600" />}
       <h2 className="text-[15px] font-semibold tracking-wide text-stone-800 uppercase">{children}</h2>
     </div>
   );
@@ -23,14 +23,14 @@ function TextField({ label, value, onChange, placeholder, type = "text", require
   return (
     <label className="block">
       <span className="text-xs font-semibold text-stone-500 uppercase tracking-wide">
-        {label} {required && <span className="text-amber-600">*</span>}
+        {label} {required && <span className="text-teal-600">*</span>}
       </span>
       <input
         type={type}
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2.5 text-[15px] text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
+        className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2.5 text-[15px] text-stone-800 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
       />
     </label>
   );
@@ -40,14 +40,14 @@ function TextArea({ label, value, onChange, placeholder, required, rows = 4 }) {
   return (
     <label className="block">
       <span className="text-xs font-semibold text-stone-500 uppercase tracking-wide">
-        {label} {required && <span className="text-amber-600">*</span>}
+        {label} {required && <span className="text-teal-600">*</span>}
       </span>
       <textarea
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2.5 text-[15px] text-stone-800 resize-none focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
+        className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2.5 text-[15px] text-stone-800 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
       />
     </label>
   );
@@ -59,10 +59,10 @@ function CheckPill({ label, active, onClick }) {
       type="button"
       onClick={onClick}
       className={`px-3 py-2 rounded-lg border text-sm font-medium transition-all text-left flex items-center gap-2
-        ${active ? "bg-amber-500 border-amber-500 text-white shadow-sm" : "bg-white border-stone-300 text-stone-700 hover:border-amber-400"}`}
+        ${active ? "bg-teal-500 border-teal-500 text-white shadow-sm" : "bg-white border-stone-300 text-stone-700 hover:border-teal-400"}`}
     >
       <span className={`flex items-center justify-center w-4 h-4 rounded border shrink-0 ${active ? "bg-white border-white" : "border-stone-400"}`}>
-        {active && <Check size={12} strokeWidth={3} className="text-amber-500" />}
+        {active && <Check size={12} strokeWidth={3} className="text-teal-500" />}
       </span>
       {label}
     </button>
@@ -136,16 +136,16 @@ function PhotoCapture({ photoDataUrl, onCapture, onClear }) {
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFile} className="hidden" />
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
       <div className="grid grid-cols-2 gap-3">
-        <button onClick={() => cameraInputRef.current?.click()} className="h-40 rounded-xl border-2 border-dashed border-stone-300 bg-stone-50 flex flex-col items-center justify-center gap-2 text-stone-500 hover:border-amber-400 hover:bg-amber-50/50 transition-colors">
-          <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
-            <Camera size={22} className="text-amber-600" />
+        <button onClick={() => cameraInputRef.current?.click()} className="h-40 rounded-xl border-2 border-dashed border-stone-300 bg-stone-50 flex flex-col items-center justify-center gap-2 text-stone-500 hover:border-teal-400 hover:bg-teal-50/50 transition-colors">
+          <div className="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center">
+            <Camera size={22} className="text-teal-600" />
           </div>
           <div className="text-center px-2">
             <div className="font-semibold text-stone-700 text-sm">Take photo</div>
             <div className="text-xs text-stone-400 mt-0.5">Use camera</div>
           </div>
         </button>
-        <button onClick={() => fileInputRef.current?.click()} className="h-40 rounded-xl border-2 border-dashed border-stone-300 bg-stone-50 flex flex-col items-center justify-center gap-2 text-stone-500 hover:border-amber-400 hover:bg-amber-50/50 transition-colors">
+        <button onClick={() => fileInputRef.current?.click()} className="h-40 rounded-xl border-2 border-dashed border-stone-300 bg-stone-50 flex flex-col items-center justify-center gap-2 text-stone-500 hover:border-teal-400 hover:bg-teal-50/50 transition-colors">
           <div className="w-12 h-12 rounded-full bg-stone-200 flex items-center justify-center">
             <ImageIcon size={22} className="text-stone-600" />
           </div>
@@ -195,14 +195,14 @@ function SiteMapPicker({ siteMapUrl, pin, onPinChange, gpsStatus }) {
       </div>
       <div className="flex items-center justify-between text-xs">
         <span className="text-stone-400">{pin ? "Tap the map to move the pin" : "Tap the map to mark the exact spot"}</span>
-        {gpsStatus === "locating" && <span className="text-amber-600 flex items-center gap-1"><Loader2 size={12} className="animate-spin" /> Locating…</span>}
+        {gpsStatus === "locating" && <span className="text-teal-600 flex items-center gap-1"><Loader2 size={12} className="animate-spin" /> Locating…</span>}
         {gpsStatus === "located" && <span className="text-emerald-600">GPS pin placed — adjust if needed</span>}
       </div>
     </div>
   );
 }
 
-export default function FormView({ profile, siteMapUrl, saveReport, setView, showToast }) {
+export default function FormView({ profile, siteMapUrl, saveReport, setView, showToast, setPendingSendReport, subcontractors = [] }) {
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState(() => {
     const fresh = emptyReportForm();
@@ -241,7 +241,12 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
     setSaving(false);
     if (saved) {
       showToast("Report saved");
-      setView("log");
+      if (profile.distribution_list && profile.distribution_list.trim()) {
+        setPendingSendReport(saved);
+        setView("send");
+      } else {
+        setView("log");
+      }
     }
   }
 
@@ -278,6 +283,23 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
                 <TextField label="Project" value={draft.project} onChange={(v) => setDraft({ ...draft, project: v })} />
                 <TextField label="Report Date" type="date" value={draft.report_date} onChange={(v) => setDraft({ ...draft, report_date: v })} />
               </div>
+              <label className="block">
+                <span className="text-xs font-semibold text-stone-500 uppercase tracking-wide">Report To (Subcontractor)</span>
+                <select
+                  value={draft.action_report_to || ""}
+                  onChange={(e) => setDraft({ ...draft, action_report_to: e.target.value })}
+                  className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2.5 text-[15px] text-stone-800 bg-white focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
+                >
+                  <option value="">— Select —</option>
+                  {subcontractors.map((s) => (
+                    <option key={s.id} value={s.name}>{s.name}</option>
+                  ))}
+                </select>
+                <p className="text-xs text-stone-400 mt-1">
+                  Their contact emails will be added automatically alongside your base distribution list.
+                  {subcontractors.length === 0 && " No subcontractors added yet — add them in Settings → Subcontractor Contacts."}
+                </p>
+              </label>
             </div>
           </div>
         );
@@ -286,7 +308,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
           <div className="space-y-5">
             <SectionTitle icon={MapPin}>Mark the Location</SectionTitle>
             {!draft.gps && gpsStatus !== "locating" && (
-              <button onClick={locateGps} className="w-full flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 font-semibold text-sm py-2.5 rounded-xl">
+              <button onClick={locateGps} className="w-full flex items-center justify-center gap-2 bg-teal-50 border border-teal-200 text-teal-700 font-semibold text-sm py-2.5 rounded-xl">
                 <MapPin size={16} /> Use my current GPS location
               </button>
             )}
@@ -317,9 +339,9 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
               <div className="space-y-2">
                 {RISK_RATINGS.map((r) => (
                   <button key={r.key} onClick={() => setDraft({ ...draft, risk_rating: r.key })}
-                    className={`w-full text-left rounded-lg border px-3 py-2.5 transition-all ${draft.risk_rating === r.key ? "bg-amber-500 border-amber-500 text-white" : "bg-white border-stone-300 hover:border-amber-400"}`}>
+                    className={`w-full text-left rounded-lg border px-3 py-2.5 transition-all ${draft.risk_rating === r.key ? "bg-teal-500 border-teal-500 text-white" : "bg-white border-stone-300 hover:border-teal-400"}`}>
                     <div className="font-semibold text-sm">{r.label}</div>
-                    <div className={`text-xs ${draft.risk_rating === r.key ? "text-amber-50" : "text-stone-400"}`}>{r.sub}</div>
+                    <div className={`text-xs ${draft.risk_rating === r.key ? "text-teal-50" : "text-stone-400"}`}>{r.sub}</div>
                   </button>
                 ))}
               </div>
@@ -397,7 +419,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
             <span className="ml-auto text-xs text-stone-400 font-medium">{step + 1} / {STEPS.length}</span>
           </div>
           <div className="h-1.5 w-full bg-stone-100 rounded-full overflow-hidden">
-            <div className="h-full bg-amber-500 rounded-full transition-all duration-300" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
+            <div className="h-full bg-teal-500 rounded-full transition-all duration-300" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
           </div>
         </header>
         <div className="p-4">{renderStep()}</div>
@@ -411,7 +433,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
           )}
           {step < STEPS.length - 1 ? (
             <button onClick={() => canNext() && setStep(step + 1)} disabled={!canNext()}
-              className="flex-1 bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-1">
+              className="flex-1 bg-teal-500 hover:bg-teal-600 disabled:opacity-40 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-1">
               Continue <ChevronRight size={18} />
             </button>
           ) : (

@@ -4,7 +4,7 @@ import { ChevronLeft, BarChart3, ClipboardList, AlertTriangle, User } from "luci
 function SectionTitle({ children, icon: Icon }) {
   return (
     <div className="flex items-center gap-2 mb-4">
-      {Icon && <Icon size={18} className="text-amber-600" />}
+      {Icon && <Icon size={18} className="text-teal-600" />}
       <h2 className="text-[15px] font-semibold tracking-wide text-stone-800 uppercase">{children}</h2>
     </div>
   );
@@ -43,7 +43,7 @@ export default function StatsView({ reports, profiles, setView }) {
         </header>
 
         <div className="p-4 space-y-6">
-          <div className="bg-stone-800 rounded-2xl p-5 text-white">
+          <div className="bg-[#0b1522] border border-teal-500/20 rounded-2xl p-5 text-white">
             <div className="text-3xl font-bold">{total}</div>
             <div className="text-stone-400 text-sm mt-0.5">Total reports across the Ontario Line site</div>
           </div>
@@ -95,7 +95,7 @@ export default function StatsView({ reports, profiles, setView }) {
                     <span>{type}</span><span>{count}</span>
                   </div>
                   <div className="h-2 rounded-full bg-stone-100 overflow-hidden">
-                    <div className="h-full rounded-full bg-amber-500" style={{ width: `${(count / maxTracking) * 100}%` }} />
+                    <div className="h-full rounded-full bg-teal-500" style={{ width: `${(count / maxTracking) * 100}%` }} />
                   </div>
                 </div>
               ))}

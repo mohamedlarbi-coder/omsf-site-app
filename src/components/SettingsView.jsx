@@ -1,19 +1,19 @@
 import React, { useState, useRef } from "react";
-import { ChevronLeft, User, Send, MapPin, Check, LogOut, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, User, Send, MapPin, Check, LogOut, Loader2, Building2 } from "lucide-react";
 import { compressImage } from "../lib/constants";
 
 function TextField({ label, value, onChange, placeholder, type = "text", required }) {
   return (
     <label className="block">
       <span className="text-xs font-semibold text-stone-500 uppercase tracking-wide">
-        {label} {required && <span className="text-amber-600">*</span>}
+        {label} {required && <span className="text-teal-600">*</span>}
       </span>
       <input
         type={type}
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2.5 text-[15px] text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
+        className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2.5 text-[15px] text-stone-800 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
       />
     </label>
   );
@@ -28,7 +28,7 @@ function TextArea({ label, value, onChange, placeholder, rows = 4 }) {
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2.5 text-[15px] text-stone-800 resize-none focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
+        className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2.5 text-[15px] text-stone-800 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
       />
     </label>
   );
@@ -37,7 +37,7 @@ function TextArea({ label, value, onChange, placeholder, rows = 4 }) {
 function SectionTitle({ children, icon: Icon }) {
   return (
     <div className="flex items-center gap-2 mb-4">
-      {Icon && <Icon size={18} className="text-amber-600" />}
+      {Icon && <Icon size={18} className="text-teal-600" />}
       <h2 className="text-[15px] font-semibold tracking-wide text-stone-800 uppercase">{children}</h2>
     </div>
   );
@@ -113,8 +113,22 @@ export default function SettingsView({ profile, siteMapUrl, updateMyProfile, han
           <div className="bg-white rounded-xl border border-stone-200 p-4 space-y-4">
             <SectionTitle icon={Send}>Distribution List</SectionTitle>
             <TextArea label="Send completed reports to" value={draft.distribution_list} onChange={(v) => setDraft({ ...draft, distribution_list: v })} placeholder="safety.manager@company.com, hse.team@company.com" rows={4} />
-            <p className="text-xs text-stone-400">Separate multiple emails with commas, semicolons, or new lines.</p>
+            <p className="text-xs text-stone-400">Separate multiple emails with commas, semicolons, or new lines. This is your base list — every report goes here by default.</p>
           </div>
+
+          <button
+            onClick={() => setView("contacts")}
+            className="w-full flex items-center justify-between gap-3 bg-white border border-stone-200 rounded-xl px-4 py-3.5 text-left hover:border-teal-300 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <Building2 size={20} className="text-teal-600" />
+              <div>
+                <div className="text-sm font-semibold text-stone-800">Subcontractor Contacts</div>
+                <div className="text-xs text-stone-400 mt-0.5">Route reports to the right company automatically</div>
+              </div>
+            </div>
+            <ChevronRight size={18} className="text-stone-300" />
+          </button>
 
           <div className="bg-white rounded-xl border border-stone-200 p-4 space-y-3">
             <SectionTitle icon={MapPin}>Site Map</SectionTitle>

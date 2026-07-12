@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Building2, Settings, BarChart3, Sparkles, ClipboardList, Loader2, Image as ImageIcon, Mail } from "lucide-react";
+import { Settings, BarChart3, Sparkles, ClipboardList, Loader2, Image as ImageIcon, Mail } from "lucide-react";
 import { riskBarInfo } from "../lib/constants";
+import SentiQLogo from "./SentiQLogo";
 
 export default function LogView({ profile, profiles, reports, setView, setActiveReport, showToast }) {
   const [filter, setFilter] = useState("all");
@@ -15,16 +16,17 @@ export default function LogView({ profile, profiles, reports, setView, setActive
   return (
     <div className="min-h-screen bg-stone-100 font-sans">
       <div className="max-w-md mx-auto pb-28">
-        <header className="bg-stone-800 text-white px-5 pt-7 pb-6 rounded-b-3xl shadow-sm">
+        <header className="bg-[#0b1522] border-b border-teal-500/20 text-white px-5 pt-7 pb-6 rounded-b-3xl shadow-sm">
           <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-2 text-violet-400 text-xs font-semibold tracking-widest uppercase">
-              <Building2 size={14} /> OMSF Site
+            <div className="flex items-center gap-2">
+              <SentiQLogo size={22} />
+              <span className="text-teal-400 text-xs font-bold tracking-widest uppercase">SentiQ · OMSF Site</span>
             </div>
             <div className="flex items-center gap-1">
-              <button onClick={() => setView("stats")} className="p-1.5 rounded-full hover:bg-white/10 text-stone-300">
+              <button onClick={() => setView("stats")} className="p-1.5 rounded-full hover:bg-white/10 text-slate-300">
                 <BarChart3 size={18} />
               </button>
-              <button onClick={() => setView("settings")} className="p-1.5 rounded-full hover:bg-white/10 text-stone-300">
+              <button onClick={() => setView("settings")} className="p-1.5 rounded-full hover:bg-white/10 text-slate-300">
                 <Settings size={18} />
               </button>
             </div>
@@ -38,12 +40,12 @@ export default function LogView({ profile, profiles, reports, setView, setActive
           {!profile.distribution_list && (
             <button
               onClick={() => setView("settings")}
-              className="w-full mb-4 flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-left"
+              className="w-full mb-4 flex items-center gap-3 bg-teal-50 border border-teal-200 rounded-xl px-4 py-3 text-left"
             >
-              <Mail size={20} className="text-amber-600 shrink-0" />
+              <Mail size={20} className="text-teal-600 shrink-0" />
               <div className="min-w-0">
-                <div className="text-sm font-semibold text-amber-800">Set up your distribution list</div>
-                <div className="text-xs text-amber-700 mt-0.5">So reports reach the safety manager automatically</div>
+                <div className="text-sm font-semibold text-teal-800">Set up your distribution list</div>
+                <div className="text-xs text-teal-700 mt-0.5">So reports reach the safety manager automatically</div>
               </div>
             </button>
           )}
@@ -51,13 +53,13 @@ export default function LogView({ profile, profiles, reports, setView, setActive
           <div className="flex gap-2 mb-4">
             <button
               onClick={() => setFilter("all")}
-              className={`flex-1 text-sm font-semibold py-2 rounded-lg border ${filter === "all" ? "bg-violet-600 border-violet-600 text-white" : "bg-white border-stone-300 text-stone-600"}`}
+              className={`flex-1 text-sm font-semibold py-2 rounded-lg border ${filter === "all" ? "bg-teal-600 border-teal-600 text-white" : "bg-white border-stone-300 text-stone-600"}`}
             >
               All Reports
             </button>
             <button
               onClick={() => setFilter("mine")}
-              className={`flex-1 text-sm font-semibold py-2 rounded-lg border ${filter === "mine" ? "bg-violet-600 border-violet-600 text-white" : "bg-white border-stone-300 text-stone-600"}`}
+              className={`flex-1 text-sm font-semibold py-2 rounded-lg border ${filter === "mine" ? "bg-teal-600 border-teal-600 text-white" : "bg-white border-stone-300 text-stone-600"}`}
             >
               My Reports
             </button>
@@ -65,8 +67,8 @@ export default function LogView({ profile, profiles, reports, setView, setActive
 
           {visibleReports.length === 0 ? (
             <div className="text-center py-16 px-6">
-              <div className="w-16 h-16 mx-auto rounded-full bg-violet-100 flex items-center justify-center mb-4">
-                <ClipboardList size={28} className="text-violet-600" />
+              <div className="w-16 h-16 mx-auto rounded-full bg-teal-100 flex items-center justify-center mb-4">
+                <ClipboardList size={28} className="text-teal-600" />
               </div>
               <h3 className="font-semibold text-stone-700 mb-1">No reports yet</h3>
               <p className="text-sm text-stone-400">
@@ -87,7 +89,7 @@ export default function LogView({ profile, profiles, reports, setView, setActive
                   <button
                     key={r.id}
                     onClick={() => { setActiveReport(r); setView("detail"); }}
-                    className="w-full bg-white rounded-xl border border-stone-200 flex gap-3 text-left hover:border-violet-300 transition-colors overflow-hidden"
+                    className="w-full bg-white rounded-xl border border-stone-200 flex gap-3 text-left hover:border-teal-300 transition-colors overflow-hidden"
                   >
                     <div className="w-1.5 shrink-0" style={{ backgroundColor: riskColor || "#e7e5e4" }} />
                     <div className="flex gap-3 p-3 pl-0 flex-1 min-w-0">
@@ -104,7 +106,7 @@ export default function LogView({ profile, profiles, reports, setView, setActive
                             {r.report_type}
                           </span>
                           {r.risk_rating && <span className="text-[11px] text-stone-400">{r.risk_rating}</span>}
-                          {r.ai_generated && <Sparkles size={11} className="text-violet-400" />}
+                          {r.ai_generated && <Sparkles size={11} className="text-teal-400" />}
                         </div>
                         <div className="font-semibold text-sm text-stone-800 truncate">{r.location || "Untitled location"}</div>
                         <div className="text-xs text-stone-400 truncate">{authorName(r)} · {r.report_date}</div>
@@ -120,8 +122,8 @@ export default function LogView({ profile, profiles, reports, setView, setActive
 
       <button
         onClick={() => setView("form")}
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-violet-600 hover:bg-violet-700 text-white
-          font-semibold px-6 py-3.5 rounded-full shadow-lg shadow-violet-600/30 flex items-center gap-2 transition-colors"
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-teal-600 hover:bg-teal-700 text-white
+          font-semibold px-6 py-3.5 rounded-full shadow-lg shadow-teal-600/30 flex items-center gap-2 transition-colors"
       >
         <Sparkles size={18} /> New Report
       </button>

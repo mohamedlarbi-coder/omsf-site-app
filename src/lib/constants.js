@@ -31,7 +31,7 @@ export function emptyReportForm() {
   return {
     project: "RSSOM Project",
     report_date: new Date().toISOString().slice(0, 10),
-    action_report_to: "GIP",
+    action_report_to: "",
     respondent: "",
     company: "",
     report_type: "Hazard",
@@ -145,12 +145,22 @@ export function getDocxLib() {
   return docxLibPromise;
 }
 
-export function buildReportEmail(report, profile) {
-  const to = (profile.distribution_list || "")
+export function buildReportEmail(report, profile, subcontractors = []) {
+  const baseEmails = (profile.distribution_list || "")
     .split(/[,;\n]/)
     .map((s) => s.trim())
-    .filter(Boolean)
-    .join(",");
+    .filter(Boolean);
+
+  // Find the subcontractor matching "Action Report To" and pull in their
+  // contact emails too, so the report reaches both the owner's safety
+  // manager AND the subcontractor responsible for that area/spot.
+  const matchedSub = subcontractors.find(
+    (s) => s.name.trim().toLowerCase() === (report.action_report_to || "").trim().toLowerCase()
+  );
+  const subEmails = matchedSub ? (matchedSub.contact_emails || []) : [];
+
+  const allEmails = [...new Set([...baseEmails, ...subEmails])];
+  const to = allEmails.join(",");
 
   const subject = `${report.report_type} Report — ${report.location || "OMSF Site"} — ${report.report_date}`;
 
@@ -166,6 +176,7 @@ export function buildReportEmail(report, profile) {
     `Date: ${report.report_date}`,
     `Respondent: ${report.respondent}${report.company ? " (" + report.company + ")" : ""}`,
     ...(reporterLine ? [`Reported by: ${reporterLine}`] : []),
+    `Action Report To: ${report.action_report_to || "—"}${matchedSub ? " (contacts notified)" : ""}`,
     ``,
     `Description:`,
     report.description || "—",
