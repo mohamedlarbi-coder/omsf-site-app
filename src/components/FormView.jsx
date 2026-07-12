@@ -7,6 +7,7 @@ import {
   REPORT_TYPES, HAZARD_CLASSES, TRACKING_TYPES, RISK_RATINGS, CONTRIBUTING_FACTORS,
   emptyReportForm, compressImage, getGpsPosition, riskBarInfo,
 } from "../lib/constants";
+import BackgroundWatermark from "./BackgroundWatermark";
 
 const STEPS = ["Photo", "Type & Location", "Site Map", "Description", "Classification", "Corrective Action", "Review"];
 
@@ -408,8 +409,9 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
   }
 
   return (
-    <div className="min-h-screen bg-[#050b14] font-sans">
-      <div className="max-w-md mx-auto pb-28">
+    <div className="min-h-screen bg-[#050b14] font-sans relative">
+      <BackgroundWatermark />
+      <div className="max-w-md mx-auto pb-28 relative z-10">
         <header className="sticky top-0 bg-[#0b1522] border-b border-slate-800 px-4 py-3 z-10">
           <div className="flex items-center gap-3 mb-3">
             <button onClick={() => setView("log")} className="p-1.5 -ml-1.5 rounded-full hover:bg-slate-800 text-slate-300">
@@ -424,7 +426,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
         </header>
         <div className="p-4">{renderStep()}</div>
       </div>
-      <div className="fixed bottom-0 left-0 right-0 bg-[#0b1522] border-t border-slate-800 p-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-[#0b1522] border-t border-slate-800 p-4 z-10">
         <div className="max-w-md mx-auto flex gap-3">
           {step > 0 && (
             <button onClick={() => setStep(step - 1)} className="px-4 py-3 rounded-xl border border-slate-700 text-slate-300 font-semibold flex items-center gap-1">

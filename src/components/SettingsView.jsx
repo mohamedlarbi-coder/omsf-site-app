@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { ChevronLeft, ChevronRight, User, Send, MapPin, Check, LogOut, Loader2, Building2 } from "lucide-react";
 import { compressImage } from "../lib/constants";
+import BackgroundWatermark from "./BackgroundWatermark";
 
 function TextField({ label, value, onChange, placeholder, type = "text", required }) {
   return (
@@ -90,8 +91,9 @@ export default function SettingsView({ profile, siteMapUrl, updateMyProfile, han
   }
 
   return (
-    <div className="min-h-screen bg-[#050b14] font-sans">
-      <div className="max-w-md mx-auto pb-10">
+    <div className="min-h-screen bg-[#050b14] font-sans relative">
+      <BackgroundWatermark />
+      <div className="max-w-md mx-auto pb-10 relative z-10">
         <header className="sticky top-0 bg-[#0b1522] border-b border-slate-800 px-4 py-3 flex items-center gap-3 z-10">
           <button onClick={() => setView("log")} className="p-1.5 -ml-1.5 rounded-full hover:bg-slate-800 text-slate-300">
             <ChevronLeft size={22} />

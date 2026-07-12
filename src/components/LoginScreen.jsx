@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { supabase } from "../supabaseClient";
 import { Loader2, ChevronLeft } from "lucide-react";
 import SentiQLogo from "./SentiQLogo";
+import BackgroundWatermark from "./BackgroundWatermark";
 
 export default function LoginScreen({ initialMode = "login", onBack }) {
   const [mode, setMode] = useState(initialMode); // "login" | "signup"
@@ -53,8 +54,9 @@ export default function LoginScreen({ initialMode = "login", onBack }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#050b14] font-sans flex flex-col">
-      <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center px-6 py-10">
+    <div className="min-h-screen bg-[#050b14] font-sans flex flex-col relative">
+      <BackgroundWatermark />
+      <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center px-6 py-10 relative z-10">
         {onBack && (
           <button onClick={onBack} className="flex items-center gap-1 text-slate-400 hover:text-teal-400 text-sm font-medium mb-4 -ml-1.5 transition-colors">
             <ChevronLeft size={18} /> Back

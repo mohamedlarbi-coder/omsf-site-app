@@ -1,6 +1,7 @@
 import React from "react";
 import { Check, Send } from "lucide-react";
 import { buildReportEmail } from "../lib/constants";
+import BackgroundWatermark from "./BackgroundWatermark";
 
 export default function SendPromptView({ profile, pendingSendReport, setPendingSendReport, setView, subcontractors = [] }) {
   if (!pendingSendReport) {
@@ -25,8 +26,9 @@ export default function SendPromptView({ profile, pendingSendReport, setPendingS
   }
 
   return (
-    <div className="min-h-screen bg-[#050b14] font-sans flex flex-col">
-      <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center px-6 py-10 text-center">
+    <div className="min-h-screen bg-[#050b14] font-sans flex flex-col relative">
+      <BackgroundWatermark />
+      <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center px-6 py-10 text-center relative z-10">
         <div className="w-16 h-16 mx-auto rounded-full bg-emerald-500/15 flex items-center justify-center mb-5">
           <Check size={28} className="text-emerald-400" />
         </div>

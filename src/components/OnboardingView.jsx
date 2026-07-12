@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Send, Check, Loader2 } from "lucide-react";
 import SentiQLogo from "./SentiQLogo";
+import BackgroundWatermark from "./BackgroundWatermark";
 
 export default function OnboardingView({ profile, updateMyProfile, setView, showToast }) {
   const [distributionList, setDistributionList] = useState(profile.distribution_list || "");
@@ -18,8 +19,9 @@ export default function OnboardingView({ profile, updateMyProfile, setView, show
   }
 
   return (
-    <div className="min-h-screen bg-[#050b14] font-sans flex flex-col">
-      <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center px-6 py-10">
+    <div className="min-h-screen bg-[#050b14] font-sans flex flex-col relative">
+      <BackgroundWatermark />
+      <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center px-6 py-10 relative z-10">
         <div className="text-center mb-8">
           <SentiQLogo size={72} />
           <h1 className="text-xl font-bold text-white mt-4">Welcome to SentiQ</h1>

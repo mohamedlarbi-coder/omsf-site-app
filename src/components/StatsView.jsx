@@ -1,5 +1,6 @@
 import React from "react";
 import { ChevronLeft, BarChart3, ClipboardList, AlertTriangle, User } from "lucide-react";
+import BackgroundWatermark from "./BackgroundWatermark";
 
 function SectionTitle({ children, icon: Icon }) {
   return (
@@ -33,8 +34,9 @@ export default function StatsView({ reports, profiles, setView }) {
   const typeColors = { Hazard: "#dc2626", "Good Spot": "#16a34a", OFI: "#2563eb", Closecall: "#ea580c" };
 
   return (
-    <div className="min-h-screen bg-[#050b14] font-sans">
-      <div className="max-w-md mx-auto pb-10">
+    <div className="min-h-screen bg-[#050b14] font-sans relative">
+      <BackgroundWatermark />
+      <div className="max-w-md mx-auto pb-10 relative z-10">
         <header className="sticky top-0 bg-[#0b1522] border-b border-slate-800 px-4 py-3 flex items-center gap-3 z-10">
           <button onClick={() => setView("log")} className="p-1.5 -ml-1.5 rounded-full hover:bg-slate-800 text-slate-300">
             <ChevronLeft size={22} />

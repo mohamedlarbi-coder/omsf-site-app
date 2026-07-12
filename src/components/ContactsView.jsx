@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ChevronLeft, Plus, Trash2, Building2, Mail, Check } from "lucide-react";
+import BackgroundWatermark from "./BackgroundWatermark";
 
 function SubcontractorEditor({ initial, onSave, onCancel }) {
   const [name, setName] = useState(initial?.name || "");
@@ -50,8 +51,9 @@ export default function ContactsView({ subcontractors, addSubcontractor, updateS
   const [editingId, setEditingId] = useState(null);
 
   return (
-    <div className="min-h-screen bg-[#050b14] font-sans">
-      <div className="max-w-md mx-auto pb-10">
+    <div className="min-h-screen bg-[#050b14] font-sans relative">
+      <BackgroundWatermark />
+      <div className="max-w-md mx-auto pb-10 relative z-10">
         <header className="sticky top-0 bg-[#0b1522] border-b border-slate-800 px-4 py-3 flex items-center gap-3 z-10">
           <button onClick={() => setView("settings")} className="p-1.5 -ml-1.5 rounded-full hover:bg-slate-800 text-slate-300">
             <ChevronLeft size={22} />

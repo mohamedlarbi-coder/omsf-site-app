@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Settings, BarChart3, Sparkles, ClipboardList, Loader2, Image as ImageIcon, Mail } from "lucide-react";
 import { riskBarInfo } from "../lib/constants";
 import SentiQLogo from "./SentiQLogo";
+import BackgroundWatermark from "./BackgroundWatermark";
 
 export default function LogView({ profile, profiles, reports, setView, setActiveReport, showToast }) {
   const [filter, setFilter] = useState("all");
@@ -14,8 +15,9 @@ export default function LogView({ profile, profiles, reports, setView, setActive
   }
 
   return (
-    <div className="min-h-screen bg-[#050b14] font-sans">
-      <div className="max-w-md mx-auto pb-28">
+    <div className="min-h-screen bg-[#050b14] font-sans relative">
+      <BackgroundWatermark />
+      <div className="max-w-md mx-auto pb-28 relative z-10">
         <header className="bg-[#0b1522] border-b border-teal-500/20 text-white px-5 pt-7 pb-6 rounded-b-3xl shadow-sm">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
