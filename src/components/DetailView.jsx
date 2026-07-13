@@ -120,7 +120,7 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
         columnWidths: [6560, 2800],
         rows: [
           new TableRow({ children: [
-            labelCell("Location / Area: " + r.location + (r.gps ? `  (GPS: ${r.gps.lat.toFixed(6)}, ${r.gps.lng.toFixed(6)})` : ""), { width: 6560 }),
+            labelCell("Location / Area: " + (r.site ? r.site + " — " : "") + r.location + (r.gps ? `  (GPS: ${r.gps.lat.toFixed(6)}, ${r.gps.lng.toFixed(6)})` : ""), { width: 6560 }),
             new TableCell({ borders, margins: cellMargins, width: { size: 2800, type: WidthType.DXA }, rowSpan: 3, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: photoParagraphChildren })] }),
           ] }),
           new TableRow({ children: [valueCell(["Description:", r.description], { width: 6560 })] }),
@@ -247,7 +247,8 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
           <div className="bg-[#0b1522] rounded-xl border border-slate-800 px-4 py-1">
             {[
               ["Type", r.report_type],
-              ["Location", `${r.project} — ${r.location}`],
+              ["Project", r.project],
+              ["Site / Location", `${r.site ? r.site + " — " : ""}${r.location}`],
               ["Respondent", `${r.respondent}${r.company ? " · " + r.company : ""}`],
               ["Description", r.description],
               ["Safety Concern", r.safety_concern],

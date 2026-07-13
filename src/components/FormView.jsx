@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import {
   REPORT_TYPES, HAZARD_CLASSES, TRACKING_TYPES, RISK_RATINGS, CONTRIBUTING_FACTORS,
+  PROJECT_OPTIONS, COMPANY_OPTIONS_BY_PROJECT, SITE_OPTIONS, BUILDING_OPTIONS_BY_SITE,
   emptyReportForm, compressImage, getGpsPosition, riskBarInfo,
 } from "../lib/constants";
 import BackgroundWatermark from "./BackgroundWatermark";
@@ -33,6 +34,27 @@ function TextField({ label, value, onChange, placeholder, type = "text", require
         placeholder={placeholder}
         className="mt-1 w-full rounded-lg border border-slate-700 bg-[#050b14] px-3 py-2.5 text-[15px] text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
       />
+    </label>
+  );
+}
+
+function SelectField({ label, value, onChange, options, required, disabled, placeholder = "— Select —" }) {
+  return (
+    <label className="block">
+      <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+        {label} {required && <span className="text-teal-400">*</span>}
+      </span>
+      <select
+        value={value || ""}
+        onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
+        className="mt-1 w-full rounded-lg border border-slate-700 bg-[#0b1522] px-3 py-2.5 text-[15px] text-white disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
+      >
+        <option value="">{placeholder}</option>
+        {options.map((opt) => (
+          <option key={opt} value={opt}>{opt}</option>
+        ))}
+      </select>
     </label>
   );
 }
@@ -230,7 +252,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
   }
 
   const canNext = () => {
-    if (step === 1) return draft.location.trim().length > 0;
+    if (step === 1) return draft.project.trim().length > 0 && draft.company.trim().length > 0 && draft.site.trim().length > 0 && draft.location.trim().length > 0;
     if (step === 3) return draft.description.trim().length > 0;
     return true;
   };
@@ -275,15 +297,55 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
             </div>
             <SectionTitle icon={MapPin}>Location & People</SectionTitle>
             <div className="space-y-4">
-              <TextField label="Location / Area" required value={draft.location} onChange={(v) => setDraft({ ...draft, location: v })} placeholder="e.g. Bay 3 pedestrian walkway" />
+              <SelectField
+                label="Project"
+                required
+                value={draft.project}
+                onChange={(v) => setDraft({ ...draft, project: v, company: "" })}
+                options={PROJECT_OPTIONS}
+              />
+
+              <SelectField
+                label="Company"
+                required
+                value={draft.company}
+                onChange={(v) => setDraft({ ...draft, company: v })}
+                options={COMPANY_OPTIONS_BY_PROJECT[draft.project] || []}
+                disabled={!draft.project}
+                placeholder={draft.project ? "— Select —" : "Select a project first"}
+              />
+
               <div className="grid grid-cols-2 gap-3">
+                <SelectField
+                  label="Site"
+                  required
+                  value={draft.site}
+                  onChange={(v) => setDraft({ ...draft, site: v, location: "" })}
+                  options={SITE_OPTIONS}
+                />
                 <TextField label="Respondent" value={draft.respondent} onChange={(v) => setDraft({ ...draft, respondent: v })} />
-                <TextField label="Company" value={draft.company} onChange={(v) => setDraft({ ...draft, company: v })} />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <TextField label="Project" value={draft.project} onChange={(v) => setDraft({ ...draft, project: v })} />
-                <TextField label="Report Date" type="date" value={draft.report_date} onChange={(v) => setDraft({ ...draft, report_date: v })} />
-              </div>
+
+              {draft.site && BUILDING_OPTIONS_BY_SITE[draft.site] ? (
+                <SelectField
+                  label="Location / Building"
+                  required
+                  value={draft.location}
+                  onChange={(v) => setDraft({ ...draft, location: v })}
+                  options={BUILDING_OPTIONS_BY_SITE[draft.site]}
+                />
+              ) : (
+                <TextField
+                  label="Location / Area"
+                  required
+                  value={draft.location}
+                  onChange={(v) => setDraft({ ...draft, location: v })}
+                  placeholder={draft.site ? "e.g. Bay 3 pedestrian walkway" : "Select a site first"}
+                />
+              )}
+
+              <TextField label="Report Date" type="date" value={draft.report_date} onChange={(v) => setDraft({ ...draft, report_date: v })} />
+
               <label className="block">
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Report To (Subcontractor)</span>
                 <select
@@ -387,7 +449,9 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
             <div className="bg-[#0b1522] rounded-xl border border-slate-800 px-4 py-1">
               {[
                 ["Type", draft.report_type],
-                ["Location", `${draft.project} — ${draft.location}`],
+                ["Project", draft.project],
+                ["Company", draft.company],
+                ["Site / Location", `${draft.site} — ${draft.location}`],
                 ["Description", draft.description],
                 ["Safety Concern", draft.safety_concern],
                 ["Hazard Classification", draft.hazard_classes.join(", ")],

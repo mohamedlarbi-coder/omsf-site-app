@@ -1,5 +1,21 @@
 export const REPORT_TYPES = ["OFI", "Good Spot", "Hazard", "Closecall"];
 
+/* Cascading location structure:
+   Project -> auto-fills the Company options
+   Site -> if it has a fixed building list, show a dropdown; otherwise free text. */
+export const PROJECT_OPTIONS = ["RSSOM Project"];
+
+export const COMPANY_OPTIONS_BY_PROJECT = {
+  "RSSOM Project": ["Connect6ix", "Metrolinx"],
+};
+
+export const SITE_OPTIONS = ["OMSF", "SUSS"];
+
+export const BUILDING_OPTIONS_BY_SITE = {
+  OMSF: ["1 OMSF Building", "2 TPSS Building", "3 MOW Building", "4 Gate House Building"],
+  // SUSS has no fixed building list yet — falls back to free text in the form.
+};
+
 export const HAZARD_CLASSES = [
   "Physical", "Chemical", "Biological", "Ergonomic", "Safety",
   "Life-Saving Rule", "Legislative", "Environmental", "Psychosocial", "Others",
@@ -34,6 +50,7 @@ export function emptyReportForm() {
     action_report_to: "",
     respondent: "",
     company: "",
+    site: "",
     report_type: "Hazard",
     location: "",
     photo_data_url: null,
@@ -171,6 +188,7 @@ export function buildReportEmail(report, profile, subcontractors = []) {
     `${report.report_type} Report — OMSF / Ontario Line`,
     ``,
     `Project: ${report.project}`,
+    `Site: ${report.site || "—"}`,
     `Location: ${report.location}`,
     ...(gpsLine ? [gpsLine] : []),
     `Date: ${report.report_date}`,
