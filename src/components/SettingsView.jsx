@@ -14,7 +14,7 @@ function TextField({ label, value, onChange, placeholder, type = "text", require
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="mt-1 w-full rounded-lg border border-slate-700 bg-[#050b14] px-3 py-2.5 text-[15px] text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
+        className="mt-1 w-full rounded-lg border border-slate-700 bg-[#08131D] px-3 py-2.5 text-[15px] text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
       />
     </label>
   );
@@ -29,7 +29,7 @@ function TextArea({ label, value, onChange, placeholder, rows = 4 }) {
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="mt-1 w-full rounded-lg border border-slate-700 bg-[#050b14] px-3 py-2.5 text-[15px] text-white placeholder:text-slate-600 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
+        className="mt-1 w-full rounded-lg border border-slate-700 bg-[#08131D] px-3 py-2.5 text-[15px] text-white placeholder:text-slate-600 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
       />
     </label>
   );
@@ -91,10 +91,10 @@ export default function SettingsView({ profile, siteMapUrl, updateMyProfile, han
   }
 
   return (
-    <div className="min-h-screen bg-[#050b14] font-sans relative">
+    <div className="min-h-screen bg-[#08131D] font-sans relative">
       <BackgroundWatermark />
       <div className="max-w-md mx-auto pb-10 relative z-10">
-        <header className="sticky top-0 bg-[#0b1522] border-b border-slate-800 px-4 py-3 flex items-center gap-3 z-10">
+        <header className="sticky top-0 bg-[#0d1b26] border-b border-slate-800 px-4 py-3 flex items-center gap-3 z-10">
           <button onClick={() => setView("log")} className="p-1.5 -ml-1.5 rounded-full hover:bg-slate-800 text-slate-300">
             <ChevronLeft size={22} />
           </button>
@@ -102,7 +102,7 @@ export default function SettingsView({ profile, siteMapUrl, updateMyProfile, han
         </header>
 
         <div className="p-4 space-y-6">
-          <div className="bg-[#0b1522] rounded-xl border border-slate-800 p-4 space-y-4">
+          <div className="bg-[#0d1b26] rounded-xl border border-slate-800 p-4 space-y-4">
             <SectionTitle icon={User}>Your Details</SectionTitle>
             <div className="grid grid-cols-2 gap-3">
               <TextField label="Full Name" value={draft.my_name} onChange={(v) => setDraft({ ...draft, my_name: v })} required />
@@ -112,7 +112,7 @@ export default function SettingsView({ profile, siteMapUrl, updateMyProfile, han
             <p className="text-xs text-slate-500 -mt-1">Auto-fills into every new report so you don't retype it.</p>
           </div>
 
-          <div className="bg-[#0b1522] rounded-xl border border-slate-800 p-4 space-y-4">
+          <div className="bg-[#0d1b26] rounded-xl border border-slate-800 p-4 space-y-4">
             <SectionTitle icon={Send}>Distribution List</SectionTitle>
             <TextArea label="Send completed reports to" value={draft.distribution_list} onChange={(v) => setDraft({ ...draft, distribution_list: v })} placeholder="safety.manager@company.com, hse.team@company.com" rows={4} />
             <p className="text-xs text-slate-500">Separate multiple emails with commas, semicolons, or new lines. This is your base list — every report goes here by default.</p>
@@ -120,7 +120,7 @@ export default function SettingsView({ profile, siteMapUrl, updateMyProfile, han
 
           <button
             onClick={() => setView("contacts")}
-            className="w-full flex items-center justify-between gap-3 bg-[#0b1522] border border-slate-800 rounded-xl px-4 py-3.5 text-left hover:border-teal-500/40 transition-colors"
+            className="w-full flex items-center justify-between gap-3 bg-[#0d1b26] border border-slate-800 rounded-xl px-4 py-3.5 text-left hover:border-teal-500/40 transition-colors"
           >
             <div className="flex items-center gap-3">
               <Building2 size={20} className="text-teal-400" />
@@ -132,7 +132,7 @@ export default function SettingsView({ profile, siteMapUrl, updateMyProfile, han
             <ChevronRight size={18} className="text-slate-600" />
           </button>
 
-          <div className="bg-[#0b1522] rounded-xl border border-slate-800 p-4 space-y-3">
+          <div className="bg-[#0d1b26] rounded-xl border border-slate-800 p-4 space-y-3">
             <SectionTitle icon={MapPin}>Site Map</SectionTitle>
             <p className="text-xs text-slate-500 -mt-2">Shared with the whole team — everyone pins hazard locations on the same site plan.</p>
             {siteMapUrl && <img src={siteMapUrl} className="w-full h-32 object-cover rounded-lg border border-slate-800" />}

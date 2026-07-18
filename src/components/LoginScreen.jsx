@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { supabase } from "../supabaseClient";
 import { Loader2, ChevronLeft } from "lucide-react";
-import SentiQLogo from "./SentiQLogo";
+import MinerviumLogo from "./MinerviumLogo";
 import BackgroundWatermark from "./BackgroundWatermark";
 
 export default function LoginScreen({ initialMode = "login", onBack }) {
@@ -54,7 +54,7 @@ export default function LoginScreen({ initialMode = "login", onBack }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#050b14] font-sans flex flex-col relative">
+    <div className="min-h-screen bg-[#08131D] font-sans flex flex-col relative">
       <BackgroundWatermark />
       <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center px-6 py-10 relative z-10">
         {onBack && (
@@ -63,14 +63,14 @@ export default function LoginScreen({ initialMode = "login", onBack }) {
           </button>
         )}
         <div className="text-center mb-8">
-          <SentiQLogo size={84} />
+          <MinerviumLogo size={84} />
           <h1 className="mt-4 text-2xl font-bold tracking-[0.12em] text-white">
-            SENTI<span className="text-teal-400">Q</span>
+            MINERVIUM
           </h1>
-          <p className="text-slate-400 text-xs mt-1.5 tracking-wide uppercase">Observe. Share. Prevent. Improve.</p>
+          <p className="text-[#8A9198] text-xs mt-1.5 tracking-wide uppercase">See. Share. Prevent. Improve.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-[#0b1522] border border-teal-500/20 rounded-2xl p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-[#0d1b26] border border-[#18D5D0]/20 rounded-2xl p-5 space-y-4">
           {mode === "signup" && (
             <div>
               <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Full Name</label>
@@ -79,7 +79,7 @@ export default function LoginScreen({ initialMode = "login", onBack }) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Mohamed Jabri"
-                className="mt-1 w-full rounded-lg border border-slate-700 bg-[#050b14] text-white px-3 py-2.5 text-[15px] placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="mt-1 w-full rounded-lg border border-slate-700 bg-[#08131D] text-white px-3 py-2.5 text-[15px] placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
           )}
@@ -91,7 +91,7 @@ export default function LoginScreen({ initialMode = "login", onBack }) {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@company.com"
               autoComplete="email"
-              className="mt-1 w-full rounded-lg border border-slate-700 bg-[#050b14] text-white px-3 py-2.5 text-[15px] placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="mt-1 w-full rounded-lg border border-slate-700 bg-[#08131D] text-white px-3 py-2.5 text-[15px] placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
           <div>
@@ -102,7 +102,7 @@ export default function LoginScreen({ initialMode = "login", onBack }) {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 6 characters"
               autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              className="mt-1 w-full rounded-lg border border-slate-700 bg-[#050b14] text-white px-3 py-2.5 text-[15px] placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="mt-1 w-full rounded-lg border border-slate-700 bg-[#08131D] text-white px-3 py-2.5 text-[15px] placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
 

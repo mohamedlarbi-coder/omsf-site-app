@@ -16,11 +16,12 @@ function RiskBar({ riskRatingKey }) {
   );
 }
 
-export default function DetailView({ profile, activeReport, setView, deleteReport, showToast, subcontractors = [] }) {
+export default function DetailView({ profile, activeReport, setView, deleteReport, showToast, subcontractors = [], isDesktop }) {
+  const backView = isDesktop ? "observations-desktop" : "log";
   const [exporting, setExporting] = useState(false);
   const r = activeReport;
   if (!r) {
-    setView("log");
+    setView(backView);
     return null;
   }
 
@@ -223,11 +224,11 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
   }
 
   return (
-    <div className="min-h-screen bg-[#050b14] font-sans relative">
+    <div className="min-h-screen bg-[#08131D] font-sans relative">
       <BackgroundWatermark />
       <div className="max-w-md mx-auto pb-10 relative z-10">
-        <header className="sticky top-0 bg-[#0b1522] border-b border-slate-800 px-4 py-3 flex items-center gap-3 z-10">
-          <button onClick={() => setView("log")} className="p-1.5 -ml-1.5 rounded-full hover:bg-slate-800 text-slate-300">
+        <header className="sticky top-0 bg-[#0d1b26] border-b border-slate-800 px-4 py-3 flex items-center gap-3 z-10">
+          <button onClick={() => setView(backView)} className="p-1.5 -ml-1.5 rounded-full hover:bg-slate-800 text-slate-300">
             <ChevronLeft size={22} />
           </button>
           <h1 className="font-semibold text-white">Report Details</h1>
@@ -244,7 +245,7 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
               </div>
             </div>
           )}
-          <div className="bg-[#0b1522] rounded-xl border border-slate-800 px-4 py-1">
+          <div className="bg-[#0d1b26] rounded-xl border border-slate-800 px-4 py-1">
             {[
               ["Type", r.report_type],
               ["Project", r.project],
@@ -276,7 +277,7 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
               </button>
             )}
             {r.author_id === profile.id && (
-              <button onClick={() => { deleteReport(r.id); setView("log"); }} className="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-semibold px-4 rounded-xl flex items-center justify-center">
+              <button onClick={() => { deleteReport(r.id); setView(backView); }} className="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-semibold px-4 rounded-xl flex items-center justify-center">
                 <Trash2 size={18} />
               </button>
             )}

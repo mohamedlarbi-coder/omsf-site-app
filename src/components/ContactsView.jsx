@@ -13,7 +13,7 @@ function SubcontractorEditor({ initial, onSave, onCancel }) {
   }
 
   return (
-    <div className="bg-[#0b1522] rounded-xl border border-slate-800 p-4 space-y-3">
+    <div className="bg-[#0d1b26] rounded-xl border border-slate-800 p-4 space-y-3">
       <label className="block">
         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Subcontractor / Company Name</span>
         <input
@@ -21,7 +21,7 @@ function SubcontractorEditor({ initial, onSave, onCancel }) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. GIP"
-          className="mt-1 w-full rounded-lg border border-slate-700 bg-[#050b14] px-3 py-2.5 text-[15px] text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
+          className="mt-1 w-full rounded-lg border border-slate-700 bg-[#08131D] px-3 py-2.5 text-[15px] text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
         />
       </label>
       <label className="block">
@@ -31,7 +31,7 @@ function SubcontractorEditor({ initial, onSave, onCancel }) {
           onChange={(e) => setEmails(e.target.value)}
           placeholder="contact1@gip.com, contact2@gip.com"
           rows={3}
-          className="mt-1 w-full rounded-lg border border-slate-700 bg-[#050b14] px-3 py-2.5 text-[15px] text-white placeholder:text-slate-600 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
+          className="mt-1 w-full rounded-lg border border-slate-700 bg-[#08131D] px-3 py-2.5 text-[15px] text-white placeholder:text-slate-600 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
         />
       </label>
       <div className="flex gap-2">
@@ -51,10 +51,10 @@ export default function ContactsView({ subcontractors, addSubcontractor, updateS
   const [editingId, setEditingId] = useState(null);
 
   return (
-    <div className="min-h-screen bg-[#050b14] font-sans relative">
+    <div className="min-h-screen bg-[#08131D] font-sans relative">
       <BackgroundWatermark />
       <div className="max-w-md mx-auto pb-10 relative z-10">
-        <header className="sticky top-0 bg-[#0b1522] border-b border-slate-800 px-4 py-3 flex items-center gap-3 z-10">
+        <header className="sticky top-0 bg-[#0d1b26] border-b border-slate-800 px-4 py-3 flex items-center gap-3 z-10">
           <button onClick={() => setView("settings")} className="p-1.5 -ml-1.5 rounded-full hover:bg-slate-800 text-slate-300">
             <ChevronLeft size={22} />
           </button>
@@ -93,7 +93,7 @@ export default function ContactsView({ subcontractors, addSubcontractor, updateS
                   onCancel={() => setEditingId(null)}
                 />
               ) : (
-                <div key={s.id} className="bg-[#0b1522] rounded-xl border border-slate-800 p-4">
+                <div key={s.id} className="bg-[#0d1b26] rounded-xl border border-slate-800 p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="font-semibold text-white flex items-center gap-2">

@@ -1,11 +1,11 @@
 {
-  "name": "SentiQ",
-  "short_name": "SentiQ",
-  "description": "Observe. Share. Prevent. Improve. Safety observation platform for OMSF - Ontario Line",
+  "name": "MINERVIUM",
+  "short_name": "MINERVIUM",
+  "description": "SEE. SHARE. PREVENT. IMPROVE. Health & Safety observation platform for OMSF - Ontario Line",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#050b14",
-  "theme_color": "#050b14",
+  "background_color": "#08131D",
+  "theme_color": "#08131D",
   "icons": [
     {
       "src": "/icon.png",

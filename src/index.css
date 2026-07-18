@@ -9,3 +9,43 @@ html, body, #root {
 body {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* MINERVIUM New Observation — responsive grid for the 4 type cards.
+   Desktop: 4 columns. Tablet: 2 columns. Mobile: 1 column, shorter cards. */
+/* MINERVIUM New Observation — responsive layout for the unified
+   4-section observation type panel.
+   Desktop: one horizontal row, columns divided by vertical lines.
+   Mobile: stacks into a single column, divided by horizontal lines. */
+@media (max-width: 560px) {
+  .minervium-obs-type-grid {
+    flex-direction: column !important;
+  }
+  .minervium-obs-type-grid button {
+    height: 130px !important;
+    flex-direction: row !important;
+    text-align: left !important;
+    justify-content: flex-start !important;
+    gap: 16px;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(160, 190, 204, 0.14) !important;
+  }
+  .minervium-obs-type-grid button:last-child {
+    border-bottom: none !important;
+  }
+  .minervium-obs-type-grid button > div:first-child {
+    height: auto !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+@keyframes minervium-check-pop {
+  0% { transform: scale(0); opacity: 0; }
+  70% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes minervium-dropdown-in {
+  0% { opacity: 0; transform: translateY(-4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+

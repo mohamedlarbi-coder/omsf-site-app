@@ -1,7 +1,7 @@
 import React from "react";
-import SentiQLogo from "./SentiQLogo";
+import MinerviumLogo from "./MinerviumLogo";
 
-/* Fixed, full-viewport watermark: the big SentiQ badge sitting faintly
+/* Fixed, full-viewport watermark: the big MINERVIUM badge sitting faintly
    behind all page content. Pointer-events disabled so it never blocks
    taps/clicks on the real UI above it. */
 export default function BackgroundWatermark() {
@@ -12,7 +12,7 @@ export default function BackgroundWatermark() {
       aria-hidden="true"
     >
       <div style={{ opacity: 0.20, transform: "scale(2.2)", imageRendering: "crisp-edges" }}>
-        <SentiQLogo size={360} />
+        <MinerviumLogo size={360} />
       </div>
     </div>
   );

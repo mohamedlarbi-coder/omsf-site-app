@@ -34,10 +34,10 @@ export default function StatsView({ reports, profiles, setView }) {
   const typeColors = { Hazard: "#dc2626", "Good Spot": "#16a34a", OFI: "#2563eb", Closecall: "#ea580c" };
 
   return (
-    <div className="min-h-screen bg-[#050b14] font-sans relative">
+    <div className="min-h-screen bg-[#08131D] font-sans relative">
       <BackgroundWatermark />
       <div className="max-w-md mx-auto pb-10 relative z-10">
-        <header className="sticky top-0 bg-[#0b1522] border-b border-slate-800 px-4 py-3 flex items-center gap-3 z-10">
+        <header className="sticky top-0 bg-[#0d1b26] border-b border-slate-800 px-4 py-3 flex items-center gap-3 z-10">
           <button onClick={() => setView("log")} className="p-1.5 -ml-1.5 rounded-full hover:bg-slate-800 text-slate-300">
             <ChevronLeft size={22} />
           </button>
@@ -45,14 +45,14 @@ export default function StatsView({ reports, profiles, setView }) {
         </header>
 
         <div className="p-4 space-y-6">
-          <div className="bg-[#0b1522] border border-teal-500/20 rounded-2xl p-5 text-white">
+          <div className="bg-[#0d1b26] border border-teal-500/20 rounded-2xl p-5 text-white">
             <div className="text-3xl font-bold">{total}</div>
             <div className="text-slate-500 text-sm mt-0.5">Total reports across the Ontario Line site</div>
           </div>
 
           <div>
             <SectionTitle icon={BarChart3}>Risk Level Breakdown</SectionTitle>
-            <div className="bg-[#0b1522] rounded-xl border border-slate-800 p-4 space-y-3">
+            <div className="bg-[#0d1b26] rounded-xl border border-slate-800 p-4 space-y-3">
               {[
                 { key: "No Risk", label: "Good", color: "#16a34a" },
                 { key: "Low", label: "Low", color: "#eab308" },
@@ -77,7 +77,7 @@ export default function StatsView({ reports, profiles, setView }) {
 
           <div>
             <SectionTitle icon={ClipboardList}>Report Type</SectionTitle>
-            <div className="bg-[#0b1522] rounded-xl border border-slate-800 p-4 flex flex-wrap gap-2">
+            <div className="bg-[#0d1b26] rounded-xl border border-slate-800 p-4 flex flex-wrap gap-2">
               {Object.entries(byType).length === 0 && <p className="text-sm text-slate-500">No data yet</p>}
               {Object.entries(byType).map(([type, count]) => (
                 <div key={type} className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold text-white" style={{ backgroundColor: typeColors[type] || "#78716c" }}>
@@ -89,7 +89,7 @@ export default function StatsView({ reports, profiles, setView }) {
 
           <div>
             <SectionTitle icon={AlertTriangle}>Hazard Trend (by Tracking Type)</SectionTitle>
-            <div className="bg-[#0b1522] rounded-xl border border-slate-800 p-4 space-y-2.5">
+            <div className="bg-[#0d1b26] rounded-xl border border-slate-800 p-4 space-y-2.5">
               {trackingSorted.length === 0 && <p className="text-sm text-slate-500">No data yet</p>}
               {trackingSorted.map(([type, count]) => (
                 <div key={type}>
@@ -109,7 +109,7 @@ export default function StatsView({ reports, profiles, setView }) {
 
           <div>
             <SectionTitle icon={User}>Reports by Team Member</SectionTitle>
-            <div className="bg-[#0b1522] rounded-xl border border-slate-800 p-4 space-y-2.5">
+            <div className="bg-[#0d1b26] rounded-xl border border-slate-800 p-4 space-y-2.5">
               {userSorted.length === 0 && <p className="text-sm text-slate-500">No data yet</p>}
               {userSorted.map(([name, count]) => (
                 <div key={name}>

@@ -6,14 +6,29 @@ export const REPORT_TYPES = ["OFI", "Good Spot", "Hazard", "Closecall"];
 export const PROJECT_OPTIONS = ["RSSOM Project"];
 
 export const COMPANY_OPTIONS_BY_PROJECT = {
-  "RSSOM Project": ["Connect6ix", "Metrolinx"],
+  "RSSOM Project": ["Connect6ix", "Metrolinx", "Subcontractor", "Visitor"],
 };
+
+export const SUBCONTRACTOR_OPTIONS = ["GIP", "Outspan", "Structform", "Sylvan", "Smith & Long", "Others"];
 
 export const SITE_OPTIONS = ["OMSF", "SUSS"];
 
 export const BUILDING_OPTIONS_BY_SITE = {
-  OMSF: ["1 OMSF Building", "2 TPSS Building", "3 MOW Building", "4 Gate House Building"],
+  OMSF: ["OMSF Building", "TPSS Building", "MOW Building", "Gate House Building", "Yard"],
   // SUSS has no fixed building list yet — falls back to free text in the form.
+};
+
+// Placeholder safety manager emails per site — replace these with the real
+// list once provided. When a user selects a site during onboarding, these
+// are pre-filled into their distribution list (they can still edit/add to
+// it before saving).
+export const DEFAULT_DISTRIBUTION_LIST_BY_SITE = {
+  OMSF: [
+    "safety.manager1@placeholder.com",
+    "safety.manager2@placeholder.com",
+    "safety.manager3@placeholder.com",
+  ],
+  // SUSS: [] — add once provided.
 };
 
 export const HAZARD_CLASSES = [
@@ -38,6 +53,16 @@ export const CONTRIBUTING_FACTORS = [
   "Distraction", "Fatigue", "Lack of Resources", "Lack of Assertiveness", "Others",
 ];
 
+export function resolveCompanyName(draft) {
+  if (draft.company === "Subcontractor") {
+    return draft.company_subcontractor === "Others" ? draft.company_subcontractor_other : draft.company_subcontractor;
+  }
+  if (draft.company === "Visitor") {
+    return draft.company_visitor_name;
+  }
+  return draft.company;
+}
+
 export function riskBarInfo(riskRatingKey) {
   const found = RISK_RATINGS.find((r) => r.key === riskRatingKey);
   return found || { color: "#a8a29e", barLabel: "NOT SET" };
@@ -50,6 +75,11 @@ export function emptyReportForm() {
     action_report_to: "",
     respondent: "",
     company: "",
+    company_subcontractor: "",
+    company_subcontractor_other: "",
+    company_visitor_name: "",
+    subcontractor: "",
+    subcontractor_other: "",
     site: "",
     report_type: "Hazard",
     location: "",
@@ -168,13 +198,17 @@ export function buildReportEmail(report, profile, subcontractors = []) {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  // Find the subcontractor matching "Action Report To" and pull in their
-  // contact emails too, so the report reaches both the owner's safety
-  // manager AND the subcontractor responsible for that area/spot.
-  const matchedSub = subcontractors.find(
-    (s) => s.name.trim().toLowerCase() === (report.action_report_to || "").trim().toLowerCase()
-  );
-  const subEmails = matchedSub ? (matchedSub.contact_emails || []) : [];
+  // Pull in contact emails for any subcontractor tied to this report —
+  // either via "Action Report To" (the older field) or the newer
+  // "Subcontractor" field on the observation itself. If the same sub is
+  // matched by both, their emails only get added once (Set dedupes).
+  const resolvedSubcontractorName =
+    report.subcontractor === "Others" ? report.subcontractor_other : report.subcontractor;
+  const namesToMatch = [report.action_report_to, resolvedSubcontractorName]
+    .filter(Boolean)
+    .map((n) => n.trim().toLowerCase());
+  const matchedSubs = subcontractors.filter((s) => namesToMatch.includes(s.name.trim().toLowerCase()));
+  const subEmails = matchedSubs.flatMap((s) => s.contact_emails || []);
 
   const allEmails = [...new Set([...baseEmails, ...subEmails])];
   const to = allEmails.join(",");

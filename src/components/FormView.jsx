@@ -5,8 +5,8 @@ import {
 } from "lucide-react";
 import {
   REPORT_TYPES, HAZARD_CLASSES, TRACKING_TYPES, RISK_RATINGS, CONTRIBUTING_FACTORS,
-  PROJECT_OPTIONS, COMPANY_OPTIONS_BY_PROJECT, SITE_OPTIONS, BUILDING_OPTIONS_BY_SITE,
-  emptyReportForm, compressImage, getGpsPosition, riskBarInfo,
+  PROJECT_OPTIONS, COMPANY_OPTIONS_BY_PROJECT, SUBCONTRACTOR_OPTIONS, SITE_OPTIONS, BUILDING_OPTIONS_BY_SITE,
+  emptyReportForm, compressImage, getGpsPosition, riskBarInfo, resolveCompanyName,
 } from "../lib/constants";
 import BackgroundWatermark from "./BackgroundWatermark";
 
@@ -32,7 +32,7 @@ function TextField({ label, value, onChange, placeholder, type = "text", require
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="mt-1 w-full rounded-lg border border-slate-700 bg-[#050b14] px-3 py-2.5 text-[15px] text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
+        className="mt-1 w-full rounded-lg border border-slate-700 bg-[#08131D] px-3 py-2.5 text-[15px] text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
       />
     </label>
   );
@@ -48,7 +48,7 @@ function SelectField({ label, value, onChange, options, required, disabled, plac
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className="mt-1 w-full rounded-lg border border-slate-700 bg-[#0b1522] px-3 py-2.5 text-[15px] text-white disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
+        className="mt-1 w-full rounded-lg border border-slate-700 bg-[#0d1b26] px-3 py-2.5 text-[15px] text-white disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
       >
         <option value="">{placeholder}</option>
         {options.map((opt) => (
@@ -70,7 +70,7 @@ function TextArea({ label, value, onChange, placeholder, required, rows = 4 }) {
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="mt-1 w-full rounded-lg border border-slate-700 bg-[#050b14] px-3 py-2.5 text-[15px] text-white placeholder:text-slate-600 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
+        className="mt-1 w-full rounded-lg border border-slate-700 bg-[#08131D] px-3 py-2.5 text-[15px] text-white placeholder:text-slate-600 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
       />
     </label>
   );
@@ -82,7 +82,7 @@ function CheckPill({ label, active, onClick }) {
       type="button"
       onClick={onClick}
       className={`px-3 py-2 rounded-lg border text-sm font-medium transition-all text-left flex items-center gap-2
-        ${active ? "bg-teal-500 border-teal-500 text-white shadow-sm" : "bg-[#0b1522] border-slate-700 text-slate-200 hover:border-teal-400"}`}
+        ${active ? "bg-teal-500 border-teal-500 text-white shadow-sm" : "bg-[#0d1b26] border-slate-700 text-slate-200 hover:border-teal-400"}`}
     >
       <span className={`flex items-center justify-center w-4 h-4 rounded border shrink-0 ${active ? "bg-white border-white" : "border-slate-600"}`}>
         {active && <Check size={12} strokeWidth={3} className="text-teal-500" />}
@@ -136,7 +136,7 @@ function PhotoCapture({ photoDataUrl, onCapture, onClear }) {
 
   if (compressing) {
     return (
-      <div className="w-full h-64 rounded-xl border border-slate-800 bg-[#050b14] flex flex-col items-center justify-center gap-2 text-slate-500">
+      <div className="w-full h-64 rounded-xl border border-slate-800 bg-[#08131D] flex flex-col items-center justify-center gap-2 text-slate-500">
         <Loader2 size={22} className="animate-spin" />
         <span className="text-sm font-medium">Optimizing photo…</span>
       </div>
@@ -159,7 +159,7 @@ function PhotoCapture({ photoDataUrl, onCapture, onClear }) {
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFile} className="hidden" />
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
       <div className="grid grid-cols-2 gap-3">
-        <button onClick={() => cameraInputRef.current?.click()} className="h-40 rounded-xl border-2 border-dashed border-slate-700 bg-[#050b14] flex flex-col items-center justify-center gap-2 text-slate-400 hover:border-teal-400 hover:bg-teal-500/5 transition-colors">
+        <button onClick={() => cameraInputRef.current?.click()} className="h-40 rounded-xl border-2 border-dashed border-slate-700 bg-[#08131D] flex flex-col items-center justify-center gap-2 text-slate-400 hover:border-teal-400 hover:bg-teal-500/5 transition-colors">
           <div className="w-12 h-12 rounded-full bg-teal-500/15 flex items-center justify-center">
             <Camera size={22} className="text-teal-400" />
           </div>
@@ -168,7 +168,7 @@ function PhotoCapture({ photoDataUrl, onCapture, onClear }) {
             <div className="text-xs text-slate-500 mt-0.5">Use camera</div>
           </div>
         </button>
-        <button onClick={() => fileInputRef.current?.click()} className="h-40 rounded-xl border-2 border-dashed border-slate-700 bg-[#050b14] flex flex-col items-center justify-center gap-2 text-slate-400 hover:border-teal-400 hover:bg-teal-500/5 transition-colors">
+        <button onClick={() => fileInputRef.current?.click()} className="h-40 rounded-xl border-2 border-dashed border-slate-700 bg-[#08131D] flex flex-col items-center justify-center gap-2 text-slate-400 hover:border-teal-400 hover:bg-teal-500/5 transition-colors">
           <div className="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center">
             <ImageIcon size={22} className="text-slate-300" />
           </div>
@@ -196,7 +196,7 @@ function SiteMapPicker({ siteMapUrl, pin, onPinChange, gpsStatus }) {
 
   if (!siteMapUrl) {
     return (
-      <div className="w-full h-44 rounded-xl border-2 border-dashed border-slate-700 bg-[#050b14] flex flex-col items-center justify-center gap-2 text-slate-500">
+      <div className="w-full h-44 rounded-xl border-2 border-dashed border-slate-700 bg-[#08131D] flex flex-col items-center justify-center gap-2 text-slate-500">
         <MapPin size={26} />
         <div className="text-center px-4">
           <div className="font-semibold text-slate-200 text-sm">No site map uploaded yet</div>
@@ -252,14 +252,29 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
   }
 
   const canNext = () => {
-    if (step === 1) return draft.project.trim().length > 0 && draft.company.trim().length > 0 && draft.site.trim().length > 0 && draft.location.trim().length > 0;
+    if (step === 1) {
+      const baseValid = draft.project.trim().length > 0 && draft.company.trim().length > 0 && draft.site.trim().length > 0 && draft.location.trim().length > 0;
+      if (!baseValid) return false;
+      if (draft.company === "Subcontractor") {
+        if (!draft.company_subcontractor) return false;
+        if (draft.company_subcontractor === "Others" && !draft.company_subcontractor_other.trim()) return false;
+      }
+      if (draft.company === "Visitor" && !draft.company_visitor_name.trim()) return false;
+      return true;
+    }
     if (step === 3) return draft.description.trim().length > 0;
     return true;
   };
 
   async function handleSave() {
     setSaving(true);
-    const payload = { ...draft, site_map_snapshot: draft.map_pin ? siteMapUrl : null };
+    // Resolve the cascading Company selection (Connect6ix / Metrolinx /
+    // Subcontractor → specific sub / Visitor → typed name) down to a
+    // single final display name before saving, so the database and
+    // downstream Word/email exports don't need new columns — they just
+    // see the resolved company name like they always have.
+    const { company_subcontractor, company_subcontractor_other, company_visitor_name, ...rest } = draft;
+    const payload = { ...rest, company: resolveCompanyName(draft), site_map_snapshot: draft.map_pin ? siteMapUrl : null };
     const saved = await saveReport(payload);
     setSaving(false);
     if (saved) {
@@ -309,11 +324,39 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
                 label="Company"
                 required
                 value={draft.company}
-                onChange={(v) => setDraft({ ...draft, company: v })}
+                onChange={(v) => setDraft({ ...draft, company: v, company_subcontractor: "", company_subcontractor_other: "", company_visitor_name: "" })}
                 options={COMPANY_OPTIONS_BY_PROJECT[draft.project] || []}
                 disabled={!draft.project}
                 placeholder={draft.project ? "— Select —" : "Select a project first"}
               />
+
+              {draft.company === "Subcontractor" && (
+                <SelectField
+                  label="Subcontractor"
+                  required
+                  value={draft.company_subcontractor}
+                  onChange={(v) => setDraft({ ...draft, company_subcontractor: v, company_subcontractor_other: "" })}
+                  options={SUBCONTRACTOR_OPTIONS}
+                />
+              )}
+              {draft.company === "Subcontractor" && draft.company_subcontractor === "Others" && (
+                <TextField
+                  label="Subcontractor Name"
+                  required
+                  value={draft.company_subcontractor_other}
+                  onChange={(v) => setDraft({ ...draft, company_subcontractor_other: v })}
+                  placeholder="Enter subcontractor name"
+                />
+              )}
+              {draft.company === "Visitor" && (
+                <TextField
+                  label="Visitor Company Name"
+                  required
+                  value={draft.company_visitor_name}
+                  onChange={(v) => setDraft({ ...draft, company_visitor_name: v })}
+                  placeholder="Enter visitor's company name"
+                />
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <SelectField
@@ -351,7 +394,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
                 <select
                   value={draft.action_report_to || ""}
                   onChange={(e) => setDraft({ ...draft, action_report_to: e.target.value })}
-                  className="mt-1 w-full rounded-lg border border-slate-700 px-3 py-2.5 text-[15px] text-white bg-[#0b1522] focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
+                  className="mt-1 w-full rounded-lg border border-slate-700 px-3 py-2.5 text-[15px] text-white bg-[#0d1b26] focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
                 >
                   <option value="">— Select —</option>
                   {subcontractors.map((s) => (
@@ -371,7 +414,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
           <div className="space-y-5">
             <SectionTitle icon={MapPin}>Mark the Location</SectionTitle>
             {!draft.gps && gpsStatus !== "locating" && (
-              <button onClick={locateGps} className="w-full flex items-center justify-center gap-2 bg-[#0b1522] border border-teal-500/30 text-teal-400 font-semibold text-sm py-2.5 rounded-xl">
+              <button onClick={locateGps} className="w-full flex items-center justify-center gap-2 bg-[#0d1b26] border border-teal-500/30 text-teal-400 font-semibold text-sm py-2.5 rounded-xl">
                 <MapPin size={16} /> Use my current GPS location
               </button>
             )}
@@ -383,6 +426,21 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
           <div className="space-y-5">
             <SectionTitle icon={AlertTriangle}>Description</SectionTitle>
             <TextArea label="Description" required rows={5} value={draft.description} onChange={(v) => setDraft({ ...draft, description: v })} />
+            <SelectField
+              label="Subcontractor"
+              value={draft.subcontractor}
+              onChange={(v) => setDraft({ ...draft, subcontractor: v, subcontractor_other: "" })}
+              options={SUBCONTRACTOR_OPTIONS}
+              placeholder="Select subcontractor…"
+            />
+            {draft.subcontractor === "Others" && (
+              <TextField
+                label="Subcontractor Name"
+                value={draft.subcontractor_other}
+                onChange={(v) => setDraft({ ...draft, subcontractor_other: v })}
+                placeholder="Enter subcontractor name"
+              />
+            )}
             <TextArea label="Safety Concern" rows={5} value={draft.safety_concern} onChange={(v) => setDraft({ ...draft, safety_concern: v })} />
           </div>
         );
@@ -402,7 +460,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
               <div className="space-y-2">
                 {RISK_RATINGS.map((r) => (
                   <button key={r.key} onClick={() => setDraft({ ...draft, risk_rating: r.key })}
-                    className={`w-full text-left rounded-lg border px-3 py-2.5 transition-all ${draft.risk_rating === r.key ? "bg-teal-500 border-teal-500 text-white" : "bg-[#0b1522] border-slate-700 text-slate-200 hover:border-teal-400"}`}>
+                    className={`w-full text-left rounded-lg border px-3 py-2.5 transition-all ${draft.risk_rating === r.key ? "bg-teal-500 border-teal-500 text-white" : "bg-[#0d1b26] border-slate-700 text-slate-200 hover:border-teal-400"}`}>
                     <div className="font-semibold text-sm">{r.label}</div>
                     <div className={`text-xs ${draft.risk_rating === r.key ? "text-teal-50" : "text-slate-500"}`}>{r.sub}</div>
                   </button>
@@ -446,11 +504,12 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
           <div className="space-y-4">
             <RiskBar riskRatingKey={draft.risk_rating} />
             {draft.photo_data_url && <img src={draft.photo_data_url} className="w-full h-48 object-cover rounded-xl border border-slate-800" />}
-            <div className="bg-[#0b1522] rounded-xl border border-slate-800 px-4 py-1">
+            <div className="bg-[#0d1b26] rounded-xl border border-slate-800 px-4 py-1">
               {[
                 ["Type", draft.report_type],
                 ["Project", draft.project],
-                ["Company", draft.company],
+                ["Company", resolveCompanyName(draft)],
+                ["Subcontractor", draft.subcontractor === "Others" ? draft.subcontractor_other : draft.subcontractor],
                 ["Site / Location", `${draft.site} — ${draft.location}`],
                 ["Description", draft.description],
                 ["Safety Concern", draft.safety_concern],
@@ -473,10 +532,10 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
   }
 
   return (
-    <div className="min-h-screen bg-[#050b14] font-sans relative">
+    <div className="min-h-screen bg-[#08131D] font-sans relative">
       <BackgroundWatermark />
       <div className="max-w-md mx-auto pb-28 relative z-10">
-        <header className="sticky top-0 bg-[#0b1522] border-b border-slate-800 px-4 py-3 z-10">
+        <header className="sticky top-0 bg-[#0d1b26] border-b border-slate-800 px-4 py-3 z-10">
           <div className="flex items-center gap-3 mb-3">
             <button onClick={() => setView("log")} className="p-1.5 -ml-1.5 rounded-full hover:bg-slate-800 text-slate-300">
               <X size={20} />
@@ -490,7 +549,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
         </header>
         <div className="p-4">{renderStep()}</div>
       </div>
-      <div className="fixed bottom-0 left-0 right-0 bg-[#0b1522] border-t border-slate-800 p-4 z-10">
+      <div className="fixed bottom-0 left-0 right-0 bg-[#0d1b26] border-t border-slate-800 p-4 z-10">
         <div className="max-w-md mx-auto flex gap-3">
           {step > 0 && (
             <button onClick={() => setStep(step - 1)} className="px-4 py-3 rounded-xl border border-slate-700 text-slate-300 font-semibold flex items-center gap-1">
