@@ -5,7 +5,7 @@ import MinerviumLogo from "./MinerviumLogo";
 import BackgroundWatermark from "./BackgroundWatermark";
 
 export default function LoginScreen({ initialMode = "login", onBack }) {
-  const [mode, setMode] = useState(initialMode); // "login" | "signup"
+  const [mode, setMode] = useState(initialMode); // "login" | "signup" | "forgot"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -17,6 +17,27 @@ export default function LoginScreen({ initialMode = "login", onBack }) {
     e.preventDefault();
     setError("");
     setInfo("");
+
+    if (mode === "forgot") {
+      if (!email.trim()) {
+        setError("Enter your email");
+        return;
+      }
+      setLoading(true);
+      try {
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+          redirectTo: window.location.origin,
+        });
+        if (resetError) setError(resetError.message);
+        else setInfo("Check your email for a link to reset your password.");
+      } catch (err) {
+        setError("Something went wrong — try again");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     if (!email.trim() || !password.trim()) {
       setError("Enter both email and password");
       return;
@@ -94,17 +115,28 @@ export default function LoginScreen({ initialMode = "login", onBack }) {
               className="mt-1 w-full rounded-lg border border-slate-700 bg-[#08131D] text-white px-3 py-2.5 text-[15px] placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
-          <div>
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 6 characters"
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              className="mt-1 w-full rounded-lg border border-slate-700 bg-[#08131D] text-white px-3 py-2.5 text-[15px] placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
-            />
-          </div>
+          {mode !== "forgot" && (
+            <div>
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="At least 6 characters"
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                className="mt-1 w-full rounded-lg border border-slate-700 bg-[#08131D] text-white px-3 py-2.5 text-[15px] placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            </div>
+          )}
+          {mode === "login" && (
+            <button
+              type="button"
+              onClick={() => { setMode("forgot"); setError(""); setInfo(""); }}
+              className="text-teal-400 text-xs font-medium hover:text-teal-300 transition-colors -mt-2"
+            >
+              Forgot password?
+            </button>
+          )}
 
           {error && <p className="text-red-400 text-xs text-center">{error}</p>}
           {info && <p className="text-emerald-400 text-xs text-center">{info}</p>}
@@ -115,7 +147,7 @@ export default function LoginScreen({ initialMode = "login", onBack }) {
             className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-400 hover:to-cyan-500 disabled:opacity-60 text-white font-bold tracking-wide py-3 rounded-xl flex items-center justify-center gap-2"
           >
             {loading && <Loader2 size={16} className="animate-spin" />}
-            {mode === "login" ? "LOG IN" : "CREATE ACCOUNT"}
+            {mode === "login" ? "LOG IN" : mode === "signup" ? "CREATE ACCOUNT" : "SEND RESET LINK"}
           </button>
         </form>
 
@@ -126,10 +158,13 @@ export default function LoginScreen({ initialMode = "login", onBack }) {
         </div>
 
         <button
-          onClick={() => { setMode(mode === "login" ? "signup" : "login"); setError(""); setInfo(""); }}
+          onClick={() => {
+            setMode(mode === "signup" || mode === "forgot" ? "login" : "signup");
+            setError(""); setInfo("");
+          }}
           className="w-full text-slate-300 font-semibold py-3 text-sm hover:text-teal-400 transition-colors"
         >
-          {mode === "login" ? "New here? Create an account" : "Already have an account? Log in"}
+          {mode === "login" ? "New here? Create an account" : mode === "forgot" ? "Back to log in" : "Already have an account? Log in"}
         </button>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "./supabaseClient";
 import LoginScreen from "./components/LoginScreen";
+import ResetPasswordScreen from "./components/ResetPasswordScreen";
 import WelcomeScreen from "./components/WelcomeScreen";
 import LogView from "./components/LogView";
 import HomeView from "./components/HomeView";
@@ -51,13 +52,19 @@ export default function App() {
   }
 
   // Watch auth state — this is what makes cross-device login work:
-  // Supabase handles the session token, refresh, everything.
+  // Supabase handles the session token, refresh, everything. Also
+  // watch for the PASSWORD_RECOVERY event, which fires when the user
+  // arrives here via the "reset your password" email link — in that
+  // case we show ResetPasswordScreen instead of the normal app.
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
+      if (event === "PASSWORD_RECOVERY") setIsPasswordRecovery(true);
     });
     return () => listener.subscription.unsubscribe();
   }, []);
@@ -240,6 +247,10 @@ export default function App() {
         <Loader2 size={28} className="text-teal-400 animate-spin" />
       </div>
     );
+  }
+
+  if (isPasswordRecovery) {
+    return <ResetPasswordScreen onDone={() => setIsPasswordRecovery(false)} />;
   }
 
   if (!session) {
