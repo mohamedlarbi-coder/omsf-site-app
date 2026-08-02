@@ -1,6 +1,5 @@
 import React from "react";
 import { Eye, Share2, ShieldCheck, TrendingUp, Lock } from "lucide-react";
-import MinerviumLogo from "./MinerviumLogo";
 
 const PILLARS = [
   { icon: Eye, label: "SEE", sub: "Capture what matters." },
@@ -11,32 +10,33 @@ const PILLARS = [
 
 export default function WelcomeScreen({ onGetStarted, onSignIn }) {
   return (
-    <div className="min-h-screen bg-[#08131D] font-sans flex flex-col relative overflow-hidden">
-      {/* real infrastructure photo background, darkened for readability */}
+    <div className="min-h-screen font-sans flex flex-col relative overflow-hidden" style={{ minHeight: "100dvh", background: "#000000" }}>
+      {/* Logo + wordmark + tagline are baked into this one image —
+          no separate rendered logo/text on top, to avoid duplicates. */}
       <div
-        className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundImage: "url('/branding/hero-background.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "47% 15%",
+          position: "fixed",
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: "none",
+          backgroundImage: "url('/branding/logo-black-bg-full.png')",
+          backgroundSize: "contain",
+          backgroundPosition: "center 32%",
           backgroundRepeat: "no-repeat",
-        }}
-      />
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: "linear-gradient(180deg, rgba(6,16,24,0.55) 0%, rgba(6,16,24,0.85) 55%, rgba(6,16,24,0.97) 100%)",
+          backgroundColor: "#000000",
         }}
       />
 
       <div className="max-w-md mx-auto w-full flex-1 flex flex-col px-6 py-10 relative z-10">
         <div className="flex-1 flex flex-col items-center justify-center text-center">
-          <MinerviumLogo size={180} showWordmark showTagline />
+          {/* spacer so the pillars/buttons sit below the logo area
+              that's already visible in the fixed background image */}
+          <div style={{ height: 320 }} />
 
           <div className="grid grid-cols-4 gap-3 mt-10 w-full">
             {PILLARS.map(({ icon: Icon, label, sub }) => (
               <div key={label} className="text-center">
-                <div className="w-11 h-11 mx-auto rounded-2xl border border-[#18D5D0]/40 bg-[#08131D]/40 backdrop-blur-sm flex items-center justify-center mb-2">
+                <div className="w-11 h-11 mx-auto rounded-2xl border border-[#18D5D0]/40 bg-black/40 backdrop-blur-sm flex items-center justify-center mb-2">
                   <Icon size={20} className="text-[#18D5D0]" strokeWidth={1.75} />
                 </div>
                 <div className="text-white text-[11px] font-semibold tracking-wide">{label}</div>
@@ -55,7 +55,7 @@ export default function WelcomeScreen({ onGetStarted, onSignIn }) {
           </button>
           <button
             onClick={onSignIn}
-            className="w-full border border-[#18D5D0]/50 text-[#18D5D0] font-bold tracking-wide py-4 rounded-[14px] hover:bg-[#18D5D0]/5 transition-colors bg-[#08131D]/30 backdrop-blur-sm"
+            className="w-full border border-[#18D5D0]/50 text-[#18D5D0] font-bold tracking-wide py-4 rounded-[14px] hover:bg-[#18D5D0]/5 transition-colors bg-black/30 backdrop-blur-sm"
           >
             SIGN IN
           </button>
