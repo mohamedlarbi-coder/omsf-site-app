@@ -18,7 +18,8 @@ export default function WelcomeScreen({ onGetStarted, onSignIn }) {
         style={{
           backgroundImage: "url('/branding/hero-background.jpg')",
           backgroundSize: "cover",
-          backgroundPosition: "center 30%",
+          backgroundPosition: "47% 15%",
+          backgroundRepeat: "no-repeat",
         }}
       />
       <div

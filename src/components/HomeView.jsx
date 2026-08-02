@@ -1,7 +1,5 @@
 import React from "react";
 import { FileText, ShieldCheck, ClipboardCheck, FileBarChart, ChevronRight } from "lucide-react";
-import MinerviumLogo from "./MinerviumLogo";
-import BackgroundWatermark from "./BackgroundWatermark";
 import BottomTabBar from "./BottomTabBar";
 
 /* MINERVIUM mobile Home screen — logo, tagline, "New Observation" CTA,
@@ -44,17 +42,24 @@ export default function HomeView({ reports, setView }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#06141E] font-sans relative overflow-x-hidden">
-      <BackgroundWatermark />
+    <div className="min-h-screen bg-black font-sans relative overflow-x-hidden">
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 0,
+          backgroundImage: "url('/branding/logo-black-bg-full.png')",
+          backgroundSize: "contain",
+          backgroundPosition: "center center",
+          backgroundRepeat: "no-repeat",
+          backgroundColor: "#000000",
+          pointerEvents: "none",
+        }}
+      />
       <div className="max-w-md mx-auto pb-32 relative z-10 px-5 pt-[max(2rem,env(safe-area-inset-top))]">
-        <div className="flex flex-col items-center text-center mb-9">
-          <MinerviumLogo
-            variant="dark"
-            size={180}
-            showWordmark
-            showTagline
-          />
-        </div>
+        {/* Logo/wordmark/tagline now live inside the fixed background
+            image itself — no need to render them again here. */}
+        <div className="mb-9" style={{ height: 260 }} />
 
         <button
           onClick={() => setView("form")}
