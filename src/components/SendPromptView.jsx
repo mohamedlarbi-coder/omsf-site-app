@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { Check, Send } from "lucide-react";
 import { buildReportEmail } from "../lib/constants";
 import BackgroundWatermark from "./BackgroundWatermark";
 
 export default function SendPromptView({ profile, pendingSendReport, setPendingSendReport, setView, subcontractors = [] }) {
+  const [extraEmail, setExtraEmail] = useState("");
+
   if (!pendingSendReport) {
     setView("log");
     return null;
@@ -20,7 +22,7 @@ export default function SendPromptView({ profile, pendingSendReport, setPendingS
   const matchedSubs = subcontractors.filter((s) => namesToMatch.includes(s.name.trim().toLowerCase()));
 
   function sendNow() {
-    const link = buildReportEmail(pendingSendReport, profile, subcontractors);
+    const link = buildReportEmail(pendingSendReport, profile, subcontractors, extraEmail.trim() ? [extraEmail.trim()] : []);
     window.open(link, "_blank");
     setPendingSendReport(null);
     setView("log");
@@ -58,6 +60,18 @@ export default function SendPromptView({ profile, pendingSendReport, setPendingS
               </div>
             </div>
           ))}
+          <div>
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1 block">
+              Add a specific email (optional)
+            </label>
+            <input
+              type="email"
+              value={extraEmail}
+              onChange={(e) => setExtraEmail(e.target.value)}
+              placeholder="someone@company.com"
+              className="w-full rounded-lg border border-slate-700 bg-[#08131D] text-white px-3 py-2.5 text-[14px] placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            />
+          </div>
         </div>
 
         <button

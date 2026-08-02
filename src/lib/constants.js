@@ -192,7 +192,7 @@ export function getDocxLib() {
   return docxLibPromise;
 }
 
-export function buildReportEmail(report, profile, subcontractors = []) {
+export function buildReportEmail(report, profile, subcontractors = [], extraEmails = []) {
   const baseEmails = (profile.distribution_list || "")
     .split(/[,;\n]/)
     .map((s) => s.trim())
@@ -210,7 +210,7 @@ export function buildReportEmail(report, profile, subcontractors = []) {
   const matchedSubs = subcontractors.filter((s) => namesToMatch.includes(s.name.trim().toLowerCase()));
   const subEmails = matchedSubs.flatMap((s) => s.contact_emails || []);
 
-  const allEmails = [...new Set([...baseEmails, ...subEmails])];
+  const allEmails = [...new Set([...baseEmails, ...subEmails, ...extraEmails])];
   const to = allEmails.join(",");
 
   const subject = `${report.report_type} Report — ${report.location || "OMSF Site"} — ${report.report_date}`;
