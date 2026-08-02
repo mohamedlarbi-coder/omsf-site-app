@@ -6,9 +6,9 @@ import BottomTabBar from "./BottomTabBar";
 
 /* MINERVIUM mobile Home screen — logo, tagline, "New Observation" CTA,
    and a card menu into the app's main areas. Observations shows the
-   real report count; Actions and Inspections are placeholder counts
-   (0) since those features don't exist as real data yet — only
-   Observations (hazard/good spot reports) is a built feature so far. */
+   real report count; Inspections is now real too (its own table).
+   Actions still shows a placeholder count (0) — it's derived from
+   report data on desktop but doesn't have a mobile view yet. */
 export default function HomeView({ reports, setView }) {
   const menuItems = [
     {
@@ -32,8 +32,7 @@ export default function HomeView({ reports, setView }) {
       icon: ClipboardCheck,
       title: "Inspections",
       subtitle: "Planned & completed",
-      count: 0,
-      comingSoon: true,
+      onClick: () => setView("inspections"),
     },
     {
       key: "reports",
@@ -45,21 +44,47 @@ export default function HomeView({ reports, setView }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#08131D] font-sans relative">
+    <div className="min-h-screen bg-[#06141E] font-sans relative overflow-x-hidden">
       <BackgroundWatermark />
-      <div className="max-w-md mx-auto pb-28 relative z-10 px-6 pt-10">
-        <div className="flex flex-col items-center text-center mb-8">
-          <MinerviumLogo size={180} full />
+      <div className="max-w-md mx-auto pb-32 relative z-10 px-5 pt-[max(2rem,env(safe-area-inset-top))]">
+        <div className="flex flex-col items-center text-center mb-9">
+          <MinerviumLogo
+            variant="dark"
+            size={180}
+            showWordmark
+            showTagline
+          />
         </div>
 
         <button
           onClick={() => setView("form")}
-          className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-400 hover:to-cyan-500 text-white font-bold tracking-wide py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-teal-500/20 transition-all mb-6"
+          className="
+            w-full min-h-[60px]
+            bg-gradient-to-r from-[#18BFB8] to-[#109AB5]
+            hover:from-[#20CFC7] hover:to-[#16A9C2]
+            active:scale-[0.985]
+            text-white text-[17px] font-bold tracking-wide
+            rounded-2xl
+            flex items-center justify-center gap-3
+            border border-cyan-300/15
+            shadow-[0_14px_34px_rgba(8,159,174,0.24)]
+            transition-all duration-200
+            mb-7
+          "
         >
-          <span className="text-lg leading-none">+</span> New Observation
+          <span className="text-[26px] leading-none font-light">+</span>
+          <span>New Observation</span>
         </button>
 
-        <div className="bg-[#0d1b26] border border-slate-800 rounded-2xl overflow-hidden">
+        <div
+          className="
+            bg-[#0B1C27]/95
+            border border-slate-700/45
+            rounded-2xl overflow-hidden
+            shadow-[0_18px_44px_rgba(0,0,0,0.28)]
+            backdrop-blur-md
+          "
+        >
           {menuItems.map((item, i) => {
             const Icon = item.icon;
             const isLast = i === menuItems.length - 1;
@@ -68,19 +93,47 @@ export default function HomeView({ reports, setView }) {
                 key={item.key}
                 onClick={item.onClick}
                 disabled={!item.onClick}
-                className={`w-full flex items-center justify-between px-5 py-4 text-left ${!isLast ? "border-b border-slate-800" : ""} ${item.onClick ? "hover:bg-white/[0.02]" : "opacity-60 cursor-default"}`}
+                className={`
+                  w-full min-h-[104px]
+                  flex items-center justify-between
+                  px-5 py-5 text-left
+                  transition-colors duration-150
+                  ${!isLast ? "border-b border-slate-700/40" : ""}
+                  ${
+                    item.onClick
+                      ? "hover:bg-white/[0.025] active:bg-teal-400/[0.045]"
+                      : "opacity-60 cursor-default"
+                  }
+                `}
               >
                 <div className="flex items-center gap-3">
-                  <Icon size={20} className="text-slate-300" strokeWidth={1.75} />
+                  <Icon
+                    size={27}
+                    className="text-slate-300 shrink-0"
+                    strokeWidth={1.75}
+                  />
                   <div>
-                    <div className="text-white text-[15px] font-semibold">{item.title}</div>
-                    <div className="text-slate-500 text-xs mt-0.5">
-                      {item.subtitle}{item.comingSoon && " · Coming soon"}
+                    <div className="text-white text-[17px] leading-tight font-semibold">
+                      {item.title}
+                    </div>
+                    <div className="text-slate-500 text-[13px] mt-1 leading-snug">
+                      {item.subtitle}
+                      {item.comingSoon && " · Coming soon"}
                     </div>
                   </div>
                 </div>
                 {typeof item.count === "number" ? (
-                  <span className="text-teal-400 text-sm font-bold bg-teal-500/10 px-2.5 py-1 rounded-lg">{item.count}</span>
+                  <span
+                    className="
+                      min-w-[44px] h-10 px-3
+                      inline-flex items-center justify-center
+                      text-teal-300 text-[16px] font-bold
+                      bg-teal-500/10 border border-teal-400/5
+                      rounded-xl
+                    "
+                  >
+                    {item.count}
+                  </span>
                 ) : (
                   <ChevronRight size={18} className="text-slate-600" />
                 )}
@@ -96,7 +149,7 @@ export default function HomeView({ reports, setView }) {
           if (key === "home") return;
           if (key === "observations") setView("log");
           else if (key === "more") setView("settings");
-          // "actions" has no destination yet — feature not built.
+          // "actions" has no mobile destination yet — feature not built there.
         }}
         onNewObservation={() => setView("form")}
       />

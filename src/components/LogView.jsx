@@ -22,7 +22,7 @@ export default function LogView({ profile, profiles, reports, setView, setActive
         <header className="bg-[#0d1b26] border-b border-teal-500/20 text-white px-5 pt-7 pb-6 rounded-b-3xl shadow-sm">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
-              <MinerviumLogo size={22} />
+              <MinerviumLogo size={40} showWordmark={false} showTagline={false} />
               <span className="text-teal-400 text-xs font-bold tracking-widest uppercase">MINERVIUM · OMSF Site</span>
             </div>
             <div className="flex items-center gap-1">

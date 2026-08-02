@@ -43,7 +43,7 @@ export default function ResetPasswordScreen({ onDone }) {
       <BackgroundWatermark />
       <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center px-6 py-10 relative z-10">
         <div className="text-center mb-8">
-          <MinerviumLogo size={72} />
+          <MinerviumLogo size={72} showWordmark={false} showTagline={false} />
           <h1 className="mt-4 text-xl font-bold text-white">Set a New Password</h1>
           <p className="text-[#8A9198] text-xs mt-2">Choose a new password for your account.</p>
         </div>

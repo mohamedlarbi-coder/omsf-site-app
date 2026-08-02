@@ -35,7 +35,7 @@ export default function DashboardSidebar({ active, onNavigate, profile }) {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 6px", marginBottom: 28 }}>
-        <MinerviumLogo size={26} />
+        <MinerviumLogo size={48} showWordmark={false} showTagline={false} />
         <span style={{ color: "#FFFFFF", fontSize: 14, fontWeight: 700, letterSpacing: "0.03em" }}>MINERVIUM</span>
       </div>
 

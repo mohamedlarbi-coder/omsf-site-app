@@ -78,7 +78,7 @@ export default function OnboardingView({ profile, updateMyProfile, setView, show
       <BackgroundWatermark />
       <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center px-6 py-10 relative z-10">
         <div className="text-center mb-6">
-          <MinerviumLogo size={64} />
+          <MinerviumLogo size={64} showWordmark={false} showTagline={false} />
           <h1 className="text-xl font-bold text-white mt-4">Welcome to MINERVIUM</h1>
           <p className="text-slate-400 text-sm mt-2 px-4">
             Let's set up your profile and site assignment before your first report.

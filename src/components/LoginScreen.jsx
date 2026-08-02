@@ -84,7 +84,7 @@ export default function LoginScreen({ initialMode = "login", onBack }) {
           </button>
         )}
         <div className="text-center mb-8">
-          <MinerviumLogo size={84} />
+          <MinerviumLogo size={96} showWordmark={false} showTagline={false} />
           <h1 className="mt-4 text-2xl font-bold tracking-[0.12em] text-white">
             MINERVIUM
           </h1>

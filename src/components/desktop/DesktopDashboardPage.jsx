@@ -29,7 +29,22 @@ export default function DesktopDashboardPage({ profile, reports, setView, showTo
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#08131D", display: "flex", fontFamily: "Inter, -apple-system, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#08131D", display: "flex", fontFamily: "Inter, -apple-system, sans-serif", position: "relative", overflow: "hidden" }}>
+      <div
+        style={{
+          position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
+          backgroundImage: "url('/branding/hero-background.jpg')",
+          backgroundSize: "cover", backgroundPosition: "center 30%",
+        }}
+      />
+      <div
+        style={{
+          position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
+          background: "linear-gradient(180deg, rgba(6,16,24,0.88) 0%, rgba(6,16,24,0.94) 100%)",
+        }}
+      />
+
+      <div style={{ position: "relative", zIndex: 1, display: "flex", width: "100%" }}>
       <DashboardSidebar active="dashboard" onNavigate={handleSidebarNav} profile={profile} />
 
       <div style={{ flex: 1, padding: "22px 28px", overflowX: "hidden" }}>
@@ -79,6 +94,7 @@ export default function DesktopDashboardPage({ profile, reports, setView, showTo
         </div>
 
         <DashboardProjectMap onViewFullMap={() => comingSoon("Full project map")} />
+      </div>
       </div>
     </div>
   );

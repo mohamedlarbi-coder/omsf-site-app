@@ -5,6 +5,7 @@ import ResetPasswordScreen from "./components/ResetPasswordScreen";
 import WelcomeScreen from "./components/WelcomeScreen";
 import LogView from "./components/LogView";
 import HomeView from "./components/HomeView";
+import InspectionsView from "./components/InspectionsView";
 import DesktopDashboardPage from "./components/desktop/DesktopDashboardPage";
 import DashboardObservationsPage from "./components/desktop/DashboardObservationsPage";
 import DashboardActionsPage from "./components/desktop/DashboardActionsPage";
@@ -292,6 +293,7 @@ export default function App() {
       )}
       {view === "onboarding" && <OnboardingView {...commonProps} />}
       {view === "home" && (isDesktop ? <DesktopDashboardPage {...commonProps} /> : <HomeView {...commonProps} />)}
+      {view === "inspections" && <InspectionsView {...commonProps} />}
       {view === "observations-desktop" && <DashboardObservationsPage {...commonProps} />}
       {view === "actions-desktop" && <DashboardActionsPage {...commonProps} />}
       {view === "inspections-desktop" && <DashboardInspectionsPage {...commonProps} />}
