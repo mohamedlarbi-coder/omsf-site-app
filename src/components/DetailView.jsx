@@ -27,7 +27,7 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
 
   function sendEmail() {
     const link = buildReportEmail(r, profile, subcontractors);
-    window.open(link, "_blank");
+    window.location.href = link;
   }
 
   async function exportDocx() {

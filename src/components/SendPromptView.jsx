@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Check, Send } from "lucide-react";
+import { Check, Send, Copy } from "lucide-react";
 import { buildReportEmail } from "../lib/constants";
 import BackgroundWatermark from "./BackgroundWatermark";
 
-export default function SendPromptView({ profile, pendingSendReport, setPendingSendReport, setView, subcontractors = [] }) {
+export default function SendPromptView({ profile, pendingSendReport, setPendingSendReport, setView, subcontractors = [], showToast }) {
   const [extraEmail, setExtraEmail] = useState("");
 
   if (!pendingSendReport) {
@@ -21,11 +21,38 @@ export default function SendPromptView({ profile, pendingSendReport, setPendingS
     .map((n) => n.trim().toLowerCase());
   const matchedSubs = subcontractors.filter((s) => namesToMatch.includes(s.name.trim().toLowerCase()));
 
+  function getLink() {
+    return buildReportEmail(pendingSendReport, profile, subcontractors, extraEmail.trim() ? [extraEmail.trim()] : []);
+  }
+
   function sendNow() {
-    const link = buildReportEmail(pendingSendReport, profile, subcontractors, extraEmail.trim() ? [extraEmail.trim()] : []);
-    window.open(link, "_blank");
+    try {
+      const link = getLink();
+      // location.href is more reliable than window.open for mailto:
+      // links — window.open can get silently blocked as a popup on
+      // some browsers, especially with no default mail app configured.
+      window.location.href = link;
+    } catch (err) {
+      showToast && showToast("Couldn't open your mail app — try 'Copy email content' instead");
+    }
     setPendingSendReport(null);
     setView("log");
+  }
+
+  async function copyContent() {
+    try {
+      const link = getLink();
+      // Pull the readable parts back out of the mailto: link for copying
+      const url = new URL(link);
+      const to = decodeURIComponent(url.pathname);
+      const subject = decodeURIComponent(url.searchParams.get("subject") || "");
+      const body = decodeURIComponent(url.searchParams.get("body") || "");
+      const text = `To: ${to}\nSubject: ${subject}\n\n${body}`;
+      await navigator.clipboard.writeText(text);
+      showToast && showToast("Copied — paste it into any email app");
+    } catch (err) {
+      showToast && showToast("Couldn't copy — try again");
+    }
   }
 
   function skip() {
@@ -79,6 +106,12 @@ export default function SendPromptView({ profile, pendingSendReport, setPendingS
           className="w-full bg-teal-500 hover:bg-teal-600 text-white font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 mb-3"
         >
           <Send size={18} /> Open Email to Send
+        </button>
+        <button
+          onClick={copyContent}
+          className="w-full border border-slate-700 text-slate-300 font-semibold py-3 rounded-xl flex items-center justify-center gap-2 mb-3 hover:bg-white/5"
+        >
+          <Copy size={16} /> Copy Email Content Instead
         </button>
         <button onClick={skip} className="w-full text-slate-400 font-medium py-2 text-sm">
           Skip for now

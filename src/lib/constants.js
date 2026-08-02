@@ -228,7 +228,7 @@ export function buildReportEmail(report, profile, subcontractors = [], extraEmai
     `Date: ${report.report_date}`,
     `Respondent: ${report.respondent}${report.company ? " (" + report.company + ")" : ""}`,
     ...(reporterLine ? [`Reported by: ${reporterLine}`] : []),
-    `Action Report To: ${report.action_report_to || "—"}${matchedSub ? " (contacts notified)" : ""}`,
+    `Action Report To: ${report.action_report_to || "—"}${matchedSubs.length > 0 ? " (contacts notified)" : ""}`,
     ``,
     `Description:`,
     report.description || "—",
@@ -254,6 +254,5 @@ export function buildReportEmail(report, profile, subcontractors = [], extraEmai
   ];
 
   const body = lines.join("\n");
-  const cc = "";
-  return `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}${cc}&body=${encodeURIComponent(body)}`;
+  return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
