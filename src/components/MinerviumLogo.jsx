@@ -54,7 +54,7 @@ export default function MinerviumLogo({
             paddingLeft: "0.17em",
           }}
         >
-          MINERVIUM
+          MINER<span style={{ color: isLight ? "#0E9AA0" : "#23E0DC" }}>V</span>IUM
         </div>
       )}
       {showTagline && (

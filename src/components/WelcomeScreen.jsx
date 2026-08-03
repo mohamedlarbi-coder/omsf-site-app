@@ -1,68 +1,61 @@
 import React from "react";
-import { Eye, Share2, ShieldCheck, TrendingUp, Lock } from "lucide-react";
-
-const PILLARS = [
-  { icon: Eye, label: "SEE", sub: "Capture what matters." },
-  { icon: Share2, label: "SHARE", sub: "Report in seconds." },
-  { icon: ShieldCheck, label: "PREVENT", sub: "Stop incidents before they happen." },
-  { icon: TrendingUp, label: "IMPROVE", sub: "Build a culture of excellence." },
-];
 
 export default function WelcomeScreen({ onGetStarted, onSignIn }) {
   return (
-    <div className="min-h-screen font-sans flex flex-col relative overflow-hidden" style={{ minHeight: "100dvh", background: "#000000" }}>
-      {/* Logo + wordmark + tagline are baked into this one image —
-          no separate rendered logo/text on top, to avoid duplicates. */}
+    <div className="min-h-screen flex items-center justify-center" style={{ minHeight: "100dvh", background: "#050C12" }}>
+      {/* The exact approved mockup, used as-is. A wrapper locked to the
+          image's own aspect ratio (1024:1536) means percentage-based
+          button overlays below always line up with the real buttons
+          in the image, regardless of viewport size — no letterboxing
+          math needed at runtime. */}
       <div
         style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 0,
-          pointerEvents: "none",
-          backgroundImage: "url('/branding/logo-black-bg-full.png')",
-          backgroundSize: "contain",
-          backgroundPosition: "center 32%",
-          backgroundRepeat: "no-repeat",
-          backgroundColor: "#000000",
+          position: "relative",
+          width: "100%",
+          height: "100%",
+          maxWidth: "min(100vw, calc(100dvh * 1024 / 1536))",
+          maxHeight: "min(100dvh, calc(100vw * 1536 / 1024))",
+          aspectRatio: "1024 / 1536",
+          margin: "0 auto",
         }}
-      />
+      >
+        <img
+          src="/branding/welcome-full-mockup.png"
+          alt="MINERVIUM"
+          draggable="false"
+          style={{ width: "100%", height: "100%", display: "block", objectFit: "contain" }}
+        />
 
-      <div className="max-w-md mx-auto w-full flex-1 flex flex-col px-6 py-10 relative z-10">
-        <div className="flex-1 flex flex-col items-center justify-center text-center">
-          {/* spacer so the pillars/buttons sit below the logo area
-              that's already visible in the fixed background image */}
-          <div style={{ height: 320 }} />
-
-          <div className="grid grid-cols-4 gap-3 mt-10 w-full">
-            {PILLARS.map(({ icon: Icon, label, sub }) => (
-              <div key={label} className="text-center">
-                <div className="w-11 h-11 mx-auto rounded-2xl border border-[#18D5D0]/40 bg-black/40 backdrop-blur-sm flex items-center justify-center mb-2">
-                  <Icon size={20} className="text-[#18D5D0]" strokeWidth={1.75} />
-                </div>
-                <div className="text-white text-[11px] font-semibold tracking-wide">{label}</div>
-                <div className="text-[#8A9198] text-[10px] mt-1 leading-tight">{sub}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-3 pb-2">
-          <button
-            onClick={onGetStarted}
-            className="w-full bg-[#18D5D0] hover:bg-[#3fe0dc] text-[#08131D] font-bold tracking-wide py-4 rounded-[14px] flex items-center justify-center gap-2 shadow-lg shadow-[#18D5D0]/20 transition-all"
-          >
-            GET STARTED <span className="text-lg">→</span>
-          </button>
-          <button
-            onClick={onSignIn}
-            className="w-full border border-[#18D5D0]/50 text-[#18D5D0] font-bold tracking-wide py-4 rounded-[14px] hover:bg-[#18D5D0]/5 transition-colors bg-black/30 backdrop-blur-sm"
-          >
-            SIGN IN
-          </button>
-          <p className="flex items-center justify-center gap-1.5 text-[#8A9198] text-[11px] tracking-wide mt-3">
-            <Lock size={12} /> YOUR SAFETY. OUR PRIORITY.
-          </p>
-        </div>
+        {/* Invisible clickable zones, positioned to match the exact
+            button locations measured from the approved mockup image. */}
+        <button
+          onClick={onGetStarted}
+          aria-label="Get Started"
+          style={{
+            position: "absolute",
+            left: "11.9%",
+            top: "71.6%",
+            width: "76.1%",
+            height: "9.6%",
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+          }}
+        />
+        <button
+          onClick={onSignIn}
+          aria-label="Sign In"
+          style={{
+            position: "absolute",
+            left: "11.9%",
+            top: "82.4%",
+            width: "76.1%",
+            height: "7.8%",
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+          }}
+        />
       </div>
     </div>
   );

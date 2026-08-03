@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { Check, Send, Copy } from "lucide-react";
+import { Check, Send, Copy, Loader2 } from "lucide-react";
 import { buildReportEmail } from "../lib/constants";
+import { supabase } from "../supabaseClient";
 import BackgroundWatermark from "./BackgroundWatermark";
 
 export default function SendPromptView({ profile, pendingSendReport, setPendingSendReport, setView, subcontractors = [], showToast }) {
   const [extraEmail, setExtraEmail] = useState("");
+  const [sending, setSending] = useState(false);
 
   if (!pendingSendReport) {
     setView("log");
@@ -21,20 +23,41 @@ export default function SendPromptView({ profile, pendingSendReport, setPendingS
     .map((n) => n.trim().toLowerCase());
   const matchedSubs = subcontractors.filter((s) => namesToMatch.includes(s.name.trim().toLowerCase()));
 
+  function getRecipients() {
+    const baseEmails = (profile.distribution_list || "").split(/[,;\n]/).map((s) => s.trim()).filter(Boolean);
+    const subEmails = matchedSubs.flatMap((s) => s.contact_emails || []);
+    const extra = extraEmail.trim() ? [extraEmail.trim()] : [];
+    return [...new Set([...baseEmails, ...subEmails, ...extra])];
+  }
+
   function getLink() {
     return buildReportEmail(pendingSendReport, profile, subcontractors, extraEmail.trim() ? [extraEmail.trim()] : []);
   }
 
-  function sendNow() {
-    try {
-      const link = getLink();
-      // location.href is more reliable than window.open for mailto:
-      // links — window.open can get silently blocked as a popup on
-      // some browsers, especially with no default mail app configured.
-      window.location.href = link;
-    } catch (err) {
-      showToast && showToast("Couldn't open your mail app — try 'Copy email content' instead");
+  // Sends the email automatically in the background via the
+  // send-report-email Edge Function — no Gmail/Outlook window opens.
+  // Requires that function to be deployed with a Resend API key
+  // configured (see supabase/functions/send-report-email/index.ts).
+  async function sendNow() {
+    const to = getRecipients();
+    if (to.length === 0) {
+      showToast && showToast("No recipients — add an email or set your distribution list first");
+      return;
     }
+    setSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-report-email", {
+        body: { to, report: pendingSendReport, profile },
+      });
+      if (error || data?.error) {
+        showToast && showToast("Couldn't send automatically — try 'Copy Email Content' instead");
+      } else {
+        showToast && showToast("Report emailed automatically");
+      }
+    } catch (err) {
+      showToast && showToast("Couldn't send automatically — try 'Copy Email Content' instead");
+    }
+    setSending(false);
     setPendingSendReport(null);
     setView("log");
   }
@@ -42,7 +65,6 @@ export default function SendPromptView({ profile, pendingSendReport, setPendingS
   async function copyContent() {
     try {
       const link = getLink();
-      // Pull the readable parts back out of the mailto: link for copying
       const url = new URL(link);
       const to = decodeURIComponent(url.pathname);
       const subject = decodeURIComponent(url.searchParams.get("subject") || "");
@@ -69,7 +91,7 @@ export default function SendPromptView({ profile, pendingSendReport, setPendingS
         </div>
         <h1 className="text-xl font-bold text-white mb-2">Report saved</h1>
         <p className="text-sm text-slate-400 mb-6">
-          Send it to the safety manager now? Your mail app will open with everything pre-filled.
+          Send it to the safety manager now? The app will email it automatically — no other app opens.
         </p>
 
         <div className="bg-[#0d1b26] rounded-xl border border-slate-800 p-4 text-left mb-6 space-y-3">
@@ -103,9 +125,11 @@ export default function SendPromptView({ profile, pendingSendReport, setPendingS
 
         <button
           onClick={sendNow}
-          className="w-full bg-teal-500 hover:bg-teal-600 text-white font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 mb-3"
+          disabled={sending}
+          className="w-full bg-teal-500 hover:bg-teal-600 disabled:opacity-60 text-white font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 mb-3"
         >
-          <Send size={18} /> Open Email to Send
+          {sending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+          {sending ? "Sending…" : "Send Automatically"}
         </button>
         <button
           onClick={copyContent}
