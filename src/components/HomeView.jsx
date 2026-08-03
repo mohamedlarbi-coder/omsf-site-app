@@ -1,150 +1,244 @@
 import React from "react";
-import { FileText, ShieldCheck, ClipboardCheck, FileBarChart, ChevronRight } from "lucide-react";
+import { FileText, ShieldCheck, ClipboardCheck, FileBarChart, ChevronRight, Bell, Plus, Calendar } from "lucide-react";
 import BottomTabBar from "./BottomTabBar";
 
-/* MINERVIUM mobile Home screen — logo, tagline, "New Observation" CTA,
-   and a card menu into the app's main areas. Observations shows the
-   real report count; Inspections is now real too (its own table).
-   Actions still shows a placeholder count (0) — it's derived from
-   report data on desktop but doesn't have a mobile view yet. */
-export default function HomeView({ reports, setView }) {
-  const menuItems = [
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning,";
+  if (h < 18) return "Good afternoon,";
+  return "Good evening,";
+}
+
+function todayLabel() {
+  return new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+}
+
+/* MINERVIUM mobile Home Dashboard — header with dynamic greeting and
+   real user name, project meta, subtle background artwork, primary
+   "New Observation" CTA, four translucent glass tiles, and the glass
+   bottom nav. Observations/Inspections/Reports use real data/routes;
+   Actions is still a placeholder (0, disabled) since that feature
+   doesn't have real data behind it yet — see DashboardActionsPage.jsx
+   comments for why it's derived-only on desktop and not built here. */
+export default function HomeView({ reports, setView, profile }) {
+  const userName = (profile?.my_name || "").split(" ")[0] || "there";
+  const initial = (profile?.my_name || "?").trim().charAt(0).toUpperCase();
+
+  const tiles = [
     {
-      key: "observations",
+      id: "observations",
       icon: FileText,
       title: "Observations",
-      subtitle: "View and manage",
+      description: "View and manage all observations",
       count: reports.length,
       onClick: () => setView("log"),
     },
     {
-      key: "actions",
+      id: "actions",
       icon: ShieldCheck,
       title: "Actions",
-      subtitle: "Open actions",
+      description: "Open actions · Coming soon",
       count: 0,
-      comingSoon: true,
+      disabled: true,
     },
     {
-      key: "inspections",
+      id: "inspections",
       icon: ClipboardCheck,
       title: "Inspections",
-      subtitle: "Planned & completed",
+      description: "Planned & completed inspections",
       onClick: () => setView("inspections"),
     },
     {
-      key: "reports",
+      id: "reports",
       icon: FileBarChart,
       title: "Reports",
-      subtitle: "Generate reports",
+      description: "Generate and export reports",
       onClick: () => setView("stats"),
     },
   ];
 
   return (
-    <div className="min-h-screen bg-black font-sans relative overflow-x-hidden">
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 0,
-          backgroundImage: "url('/branding/logo-black-bg-full.png')",
-          backgroundSize: "contain",
-          backgroundPosition: "center center",
-          backgroundRepeat: "no-repeat",
-          backgroundColor: "#000000",
-          pointerEvents: "none",
-        }}
-      />
-      <div className="max-w-md mx-auto pb-32 relative z-10 px-5 pt-[max(2rem,env(safe-area-inset-top))]">
-        {/* Logo/wordmark/tagline now live inside the fixed background
-            image itself — no need to render them again here. */}
-        <div className="mb-9" style={{ height: 260 }} />
+    <div
+      className="relative w-full overflow-x-hidden text-white"
+      style={{ minHeight: "100dvh", background: "#000000" }}
+    >
+      {/* Background artwork — fixed behind all content, low opacity,
+          dark gradient + subtle cyan glow so it never fights readability. */}
+      <div aria-hidden="true" style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage: "url('/branding/hero-background.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "47% 15%",
+            backgroundRepeat: "no-repeat",
+            opacity: 0.6,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.22) 34%, rgba(0,0,0,0.58) 72%, rgba(0,0,0,0.92) 100%)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "radial-gradient(circle at 50% 36%, rgba(0,216,220,0.07), rgba(0,0,0,0) 40%)",
+          }}
+        />
+      </div>
 
+      <div
+        className="relative z-10 mx-auto"
+        style={{
+          maxWidth: 900,
+          paddingInline: "clamp(18px, 4vw, 40px)",
+          paddingTop: "calc(18px + env(safe-area-inset-top))",
+          paddingBottom: "calc(150px + env(safe-area-inset-bottom))",
+        }}
+      >
+        {/* Header */}
+        <div style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", alignItems: "center", gap: 14 }}>
+          <img
+            src="/branding/logo-icon.png"
+            alt="MINERVIUM construction safety platform"
+            style={{ width: 56, height: 56, objectFit: "contain" }}
+          />
+          <div style={{ lineHeight: 1.1, minWidth: 0 }}>
+            <div style={{ color: "#fff", fontWeight: 800, fontSize: "clamp(16px, 4.2vw, 19px)" }}>{greeting()}</div>
+            <div style={{ color: "#23E0DC", fontWeight: 800, fontSize: "clamp(18px, 4.8vw, 22px)" }}>{userName}</div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <button
+              aria-label="Notifications"
+              style={{
+                position: "relative",
+                width: 44, height: 44, borderRadius: "50%",
+                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+            >
+              <Bell size={19} color="#D5D8DC" />
+              <span style={{ position: "absolute", top: 9, right: 10, width: 7, height: 7, borderRadius: "50%", background: "#23E0DC", boxShadow: "0 0 6px rgba(35,224,220,0.8)" }} />
+            </button>
+            <div
+              aria-hidden="true"
+              style={{
+                width: 48, height: 48, borderRadius: "50%",
+                background: "rgba(11,28,39,0.7)", border: "1.5px solid rgba(35,224,220,0.5)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: "#23E0DC", fontWeight: 700, fontSize: 17,
+                boxShadow: "0 0 14px rgba(35,224,220,0.12)",
+              }}
+            >
+              {initial}
+            </div>
+          </div>
+        </div>
+
+        {/* Project + date meta */}
+        <div style={{ textAlign: "center", marginTop: 22 }}>
+          <div style={{ fontSize: "clamp(13px, 3.4vw, 15px)" }}>
+            <span style={{ color: "#23E0DC", fontWeight: 700 }}>OMSF Project</span>
+            <span style={{ color: "#8A9198" }}> · Toronto, ON</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 6, color: "#8A9198", fontSize: "clamp(12px, 3vw, 13.5px)" }}>
+            <Calendar size={13} />
+            <span>{todayLabel()}</span>
+            <span style={{ opacity: 0.6 }}>•</span>
+            <ShieldCheck size={13} />
+            <span>Site Safety Dashboard</span>
+          </div>
+        </div>
+
+        {/* Spacer so the background artwork breathes before the CTA */}
+        <div style={{ height: 140 }} />
+
+        {/* New Observation CTA */}
         <button
           onClick={() => setView("form")}
-          className="
-            w-full min-h-[60px]
-            bg-gradient-to-r from-[#18BFB8] to-[#109AB5]
-            hover:from-[#20CFC7] hover:to-[#16A9C2]
-            active:scale-[0.985]
-            text-white text-[17px] font-bold tracking-wide
-            rounded-2xl
-            flex items-center justify-center gap-3
-            border border-cyan-300/15
-            shadow-[0_14px_34px_rgba(8,159,174,0.24)]
-            transition-all duration-200
-            mb-7
-          "
+          className="active:scale-[0.985] transition-transform duration-200"
+          style={{
+            width: "100%",
+            minHeight: 78,
+            borderRadius: 26,
+            display: "flex", alignItems: "center", gap: 14,
+            padding: "0 20px",
+            background: "linear-gradient(110deg, rgba(23,216,218,0.92) 0%, rgba(34,209,214,0.82) 52%, rgba(14,91,116,0.68) 100%)",
+            border: "1px solid rgba(255,255,255,0.14)",
+            boxShadow: "0 14px 34px rgba(8,159,174,0.24)",
+            backdropFilter: "blur(18px) saturate(125%)",
+            WebkitBackdropFilter: "blur(18px) saturate(125%)",
+            marginBottom: 28,
+          }}
         >
-          <span className="text-[26px] leading-none font-light">+</span>
-          <span>New Observation</span>
+          <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(3,10,13,0.85)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Plus size={20} color="#23E0DC" strokeWidth={2.6} />
+          </div>
+          <span style={{ flex: 1, textAlign: "left", color: "#031014", fontWeight: 800, fontSize: "clamp(16px, 4.2vw, 18px)" }}>New Observation</span>
+          <ChevronRight size={22} color="#031014" strokeWidth={2.5} />
         </button>
 
-        <div
-          className="
-            bg-[#0B1C27]/95
-            border border-slate-700/45
-            rounded-2xl overflow-hidden
-            shadow-[0_18px_44px_rgba(0,0,0,0.28)]
-            backdrop-blur-md
-          "
-        >
-          {menuItems.map((item, i) => {
-            const Icon = item.icon;
-            const isLast = i === menuItems.length - 1;
+        {/* Dashboard tiles — translucent glass cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
+          {tiles.map((tile) => {
+            const Icon = tile.icon;
             return (
               <button
-                key={item.key}
-                onClick={item.onClick}
-                disabled={!item.onClick}
-                className={`
-                  w-full min-h-[104px]
-                  flex items-center justify-between
-                  px-5 py-5 text-left
-                  transition-colors duration-150
-                  ${!isLast ? "border-b border-slate-700/40" : ""}
-                  ${
-                    item.onClick
-                      ? "hover:bg-white/[0.025] active:bg-teal-400/[0.045]"
-                      : "opacity-60 cursor-default"
-                  }
-                `}
+                key={tile.id}
+                onClick={tile.onClick}
+                disabled={!tile.onClick}
+                aria-label={tile.title}
+                style={{
+                  width: "100%",
+                  minHeight: 84,
+                  borderRadius: 22,
+                  display: "flex", alignItems: "center", gap: 14,
+                  padding: "16px 18px",
+                  background: "rgba(11,28,39,0.42)",
+                  border: "1px solid rgba(58,211,218,0.18)",
+                  backdropFilter: "blur(20px) saturate(130%)",
+                  WebkitBackdropFilter: "blur(20px) saturate(130%)",
+                  opacity: tile.disabled ? 0.55 : 1,
+                  cursor: tile.onClick ? "pointer" : "default",
+                  textAlign: "left",
+                }}
               >
-                <div className="flex items-center gap-3">
-                  <Icon
-                    size={27}
-                    className="text-slate-300 shrink-0"
-                    strokeWidth={1.75}
-                  />
-                  <div>
-                    <div className="text-white text-[17px] leading-tight font-semibold">
-                      {item.title}
-                    </div>
-                    <div className="text-slate-500 text-[13px] mt-1 leading-snug">
-                      {item.subtitle}
-                      {item.comingSoon && " · Coming soon"}
-                    </div>
-                  </div>
+                <div style={{ width: 46, height: 46, borderRadius: 14, background: "rgba(35,224,220,0.08)", border: "1px solid rgba(35,224,220,0.18)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Icon size={21} color="#23E0DC" strokeWidth={1.75} />
                 </div>
-                {typeof item.count === "number" ? (
-                  <span
-                    className="
-                      min-w-[44px] h-10 px-3
-                      inline-flex items-center justify-center
-                      text-teal-300 text-[16px] font-bold
-                      bg-teal-500/10 border border-teal-400/5
-                      rounded-xl
-                    "
-                  >
-                    {item.count}
-                  </span>
-                ) : (
-                  <ChevronRight size={18} className="text-slate-600" />
-                )}
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ color: "#fff", fontWeight: 700, fontSize: "clamp(15px, 3.8vw, 17px)" }}>{tile.title}</div>
+                  <div style={{ color: "#9AA5AC", fontSize: "clamp(11.5px, 3vw, 13px)", marginTop: 2 }}>{tile.description}</div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+                  {typeof tile.count === "number" && (
+                    <span
+                      style={{
+                        minWidth: 38, height: 34, padding: "0 10px",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        color: "#23E0DC", fontWeight: 800, fontSize: 15,
+                        background: "rgba(35,224,220,0.1)", borderRadius: 12,
+                      }}
+                    >
+                      {tile.count}
+                    </span>
+                  )}
+                  <ChevronRight size={18} color="#5C6870" />
+                </div>
               </button>
             );
           })}
+        </div>
+
+        {/* Footer */}
+        <div style={{ textAlign: "center", marginTop: 32, color: "#8A9198", fontSize: "clamp(10px, 2.7vw, 13px)", opacity: 0.65, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+          🔒 Protecting people. Empowering construction.
         </div>
       </div>
 
@@ -154,7 +248,6 @@ export default function HomeView({ reports, setView }) {
           if (key === "home") return;
           if (key === "observations") setView("log");
           else if (key === "more") setView("settings");
-          // "actions" has no mobile destination yet — feature not built there.
         }}
         onNewObservation={() => setView("form")}
       />
