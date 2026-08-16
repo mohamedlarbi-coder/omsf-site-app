@@ -332,3 +332,29 @@ export function comparePeriods(allReports = [], filters = {}) {
     }, {}),
   };
 }
+/* Reporter engagement resolved through the profiles table.
+   Falls back to the free-text respondent when author_id has no profile —
+   older records predate the field, and respondent is typed by hand so the
+   same person can appear under two spellings. Profile name wins when known. */
+export function getEngagementByAuthor(reports = [], profiles = []) {
+  const nameById = new Map(profiles.map((p) => [p.id, p.my_name]).filter(([, n]) => n));
+
+  const counts = new Map();
+  let counted = 0;
+
+  reports.forEach((r) => {
+    const name = nameById.get(r.author_id) || r.respondent || "Unknown";
+    counts.set(name, (counts.get(name) || 0) + 1);
+    counted += 1;
+  });
+
+  const items = Array.from(counts.entries())
+    .map(([label, count]) => ({
+      label,
+      count,
+      pct: counted > 0 ? Math.round((count / counted) * 1000) / 10 : 0,
+    }))
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+
+  return { items, denominator: counted, denominatorUnit: "reports", isEmpty: items.length === 0 };
+}
