@@ -23,6 +23,7 @@ export default function DesktopDashboardPage({ profile, reports, setView, showTo
     if (key === "observations") setView("observations-desktop");
     else if (key === "actions") setView("actions-desktop");
     else if (key === "inspections") setView("inspections-desktop");
+    else if (key === "analytics") setView("analytics-desktop");
     else if (key === "reports") setView("stats");
     else if (key === "settings") setView("settings");
     else comingSoon(key.charAt(0).toUpperCase() + key.slice(1));
