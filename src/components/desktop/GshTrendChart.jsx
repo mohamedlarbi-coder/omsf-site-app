@@ -11,10 +11,9 @@ import { useMemo } from "react";
    break is shown rather than smoothed over.
 --------------------------------------------------------------------------- */
 
-const W = 680;
-const H = 185;
-const PAD_L = 40;
-const PAD_R = 40;
+/* Default geometry is tuned for the desktop grid. `narrow` re-proportions it
+   for a phone: a smaller viewBox means less downscaling, so axis text stays
+   legible instead of rendering at 6px. */
 const TOP = 20;
 const BASE = 160;
 
@@ -27,7 +26,21 @@ function niceMax(v) {
   return 10 * mag;
 }
 
-export default function GshTrendChart({ rows, labels, through, firstLive = -1 }) {
+export default function GshTrendChart({
+  rows,
+  labels,
+  through,
+  firstLive = -1,
+  narrow = false,
+}) {
+  const W = narrow ? 360 : 680;
+  const H = narrow ? 200 : 185;
+  const PAD_L = narrow ? 28 : 40;
+  const PAD_R = narrow ? 14 : 40;
+  const FS_TICK = narrow ? 13 : 9.5;
+  const FS_AXIS = narrow ? 14 : 10.5;
+  const FS_NOTE = narrow ? 12 : 9;
+  const STROKE = narrow ? 3.2 : 2.5;
   const { series, xs, ticks, count } = useMemo(() => {
     let n = through ?? labels.length;
     n = Math.max(2, Math.min(n, labels.length));
@@ -53,7 +66,7 @@ export default function GshTrendChart({ rows, labels, through, firstLive = -1 })
         isFlat: r.values.slice(0, n).every((v) => v === 0),
       })),
     };
-  }, [rows, labels, through]);
+  }, [rows, labels, through, W, PAD_L, PAD_R]);
 
   /* Only dot the lines readable at the right edge — otherwise they overlap. */
   const marked = [...series]
@@ -82,7 +95,7 @@ export default function GshTrendChart({ rows, labels, through, firstLive = -1 })
               y2={t.y}
               stroke={t.v === 0 ? "rgba(160,190,204,0.22)" : "rgba(160,190,204,0.07)"}
             />
-            <text x={PAD_L - 7} y={t.y + 3} fontSize="9.5" fill="#5C6870" textAnchor="end">
+            <text x={PAD_L - 7} y={t.y + 3} fontSize={FS_TICK} fill="#5C6870" textAnchor="end">
               {t.v}
             </text>
           </g>
@@ -99,8 +112,8 @@ export default function GshTrendChart({ rows, labels, through, firstLive = -1 })
               strokeWidth="1.5"
               strokeDasharray="5 4"
             />
-            <text x={boundaryX + 5} y={TOP - 2} fontSize="9" fill="#E0A80F" fontWeight="600">
-              app capture begins
+            <text x={boundaryX + 5} y={TOP - 2} fontSize={FS_NOTE} fill="#E0A80F" fontWeight="600">
+              {narrow ? "app data" : "app capture begins"}
             </text>
           </g>
         )}
@@ -111,7 +124,7 @@ export default function GshTrendChart({ rows, labels, through, firstLive = -1 })
             points={s.points}
             fill="none"
             stroke={s.colour}
-            strokeWidth={s.isFlat ? 1.6 : 2.5}
+            strokeWidth={s.isFlat ? STROKE * 0.6 : STROKE}
             strokeDasharray={s.isFlat ? "4 4" : undefined}
             strokeOpacity={s.isFlat ? 0.35 : 1}
             strokeLinecap="round"
@@ -122,11 +135,11 @@ export default function GshTrendChart({ rows, labels, through, firstLive = -1 })
         {series
           .filter((s) => marked.includes(s.code))
           .map((s) => (
-            <circle key={s.code} cx={xs[count - 1]} cy={s.lastY} r="4.2" fill={s.colour} />
+            <circle key={s.code} cx={xs[count - 1]} cy={s.lastY} r={narrow ? 5 : 4.2} fill={s.colour} />
           ))}
 
         {labels.slice(0, count).map((l, i) => (
-          <text key={l} x={xs[i]} y={H - 6} fontSize="10.5" fill="#8A9198" textAnchor="middle">
+          <text key={l} x={xs[i]} y={H - 6} fontSize={FS_AXIS} fill="#8A9198" textAnchor="middle">
             {l}
           </text>
         ))}
@@ -139,7 +152,7 @@ export default function GshTrendChart({ rows, labels, through, firstLive = -1 })
           gap: 11,
           marginTop: 12,
           color: "#8A9198",
-          fontSize: 10.5,
+          fontSize: narrow ? 12 : 10.5,
         }}
       >
         {series.map((s) => (
