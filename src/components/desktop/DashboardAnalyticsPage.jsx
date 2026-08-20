@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Bell } from "lucide-react";
 import DashboardSidebar from "./DashboardSidebar";
 import GshMetricBlock from "./GshMetricBlock";
+import GshTrendAnalysis from "./GshTrendAnalysis";
 import {
   DOMAINS,
   MONTH_LABELS,
@@ -222,6 +223,25 @@ export default function DashboardAnalyticsPage({ profile, reports = [], setView,
                   note={siteNote}
                 />
               </div>
+
+              <p
+                style={{
+                  margin: "28px 0 11px",
+                  color: "#25E0DE",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Trend analysis
+              </p>
+              <GshTrendAnalysis
+                eventMatrix={matrices.event}
+                classMatrix={matrices.klass}
+                factorMatrix={matrices.factor}
+                currentMonth={currentMonth}
+              />
 
               <p style={{ marginTop: 20, color: "#5C6870", fontSize: 10.5, lineHeight: 1.6 }}>
                 Highlighted column = current reporting period. Amber = twelve-month peak for
