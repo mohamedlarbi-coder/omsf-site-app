@@ -15,6 +15,7 @@ import FormView from "./components/FormView";
 import DetailView from "./components/DetailView";
 import SettingsView from "./components/SettingsView";
 import StatsView from "./components/StatsView";
+import GshTrendsView from "./components/GshTrendsView";
 import NewObservationPage from "./components/desktop/NewObservationPage";
 import NewObservationDetailsPage from "./components/desktop/NewObservationDetailsPage";
 import NewObservationMediaPage from "./components/desktop/NewObservationMediaPage";
@@ -304,6 +305,7 @@ export default function App() {
       {view === "detail" && <DetailView {...commonProps} />}
       {view === "settings" && <SettingsView {...commonProps} />}
       {view === "stats" && <StatsView {...commonProps} />}
+      {view === "gsh-trends" && <GshTrendsView {...commonProps} />}
       {view === "new-observation-desktop" && (
         <NewObservationPage
           initialDraft={observationDraft}
