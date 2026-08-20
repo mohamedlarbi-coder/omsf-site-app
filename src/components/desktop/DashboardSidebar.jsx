@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   LayoutDashboard, FileText, ClipboardCheck, AlertTriangle, CheckSquare,
   BarChart2, Users, FileBarChart, Settings, ChevronDown,
@@ -17,27 +17,85 @@ const NAV_ITEMS = [
   { key: "settings", label: "Settings", icon: Settings },
 ];
 
-/* Left sidebar navigation for the desktop Dashboard. Only "Dashboard"
-   and "Observations"/"Reports"/"Settings" actually route anywhere yet
-   (Inspections, Incidents, Actions, Analytics, Users aren't built
-   features — clicking them shows a "coming soon" toast). */
+const STORAGE_KEY = "minervium.sidebar.collapsed";
+
+/* Left sidebar navigation for the desktop Dashboard. Only "Dashboard",
+   "Observations", "Inspections", "Actions", "Analytics", "Reports" and
+   "Settings" route anywhere yet (Incidents and Users aren't built —
+   clicking them shows a "coming soon" toast).
+
+   Clicking the logo collapses the bar to an icon rail. The state is kept in
+   localStorage rather than component state because each desktop page mounts
+   its own sidebar: without persistence the bar would spring back open every
+   time you navigated, which is worse than not having the toggle at all. */
 export default function DashboardSidebar({ active, onNavigate, profile }) {
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      return window.localStorage.getItem(STORAGE_KEY) === "1";
+    } catch {
+      return false; // private mode, storage disabled — just default to open
+    }
+  });
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, collapsed ? "1" : "0");
+    } catch {
+      /* not worth surfacing — the toggle still works for this session */
+    }
+  }, [collapsed]);
+
+  const width = collapsed ? 68 : 220;
+
   return (
     <div
       style={{
-        width: 220,
+        width,
+        flex: "none",
         minHeight: "100vh",
         background: "#0A141C",
         borderRight: "1px solid rgba(255,255,255,0.06)",
         display: "flex",
         flexDirection: "column",
-        padding: "20px 14px",
+        padding: collapsed ? "20px 10px" : "20px 14px",
+        transition: "width 180ms cubic-bezier(0.22,1,0.36,1), padding 180ms ease",
+        overflow: "hidden",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 6px", marginBottom: 28 }}>
-        <MinerviumLogo size={48} showWordmark={false} showTagline={false} />
-        <span style={{ color: "#FFFFFF", fontSize: 14, fontWeight: 700, letterSpacing: "0.03em" }}>MINERVIUM</span>
-      </div>
+      <button
+        type="button"
+        onClick={() => setCollapsed((c) => !c)}
+        aria-expanded={!collapsed}
+        aria-label={collapsed ? "Expand navigation" : "Collapse navigation"}
+        title={collapsed ? "Expand navigation" : "Collapse navigation"}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: collapsed ? 0 : "0 6px",
+          marginBottom: 28,
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          justifyContent: collapsed ? "center" : "flex-start",
+          width: "100%",
+        }}
+      >
+        <MinerviumLogo size={collapsed ? 40 : 48} showWordmark={false} showTagline={false} />
+        {!collapsed && (
+          <span
+            style={{
+              color: "#FFFFFF",
+              fontSize: 14,
+              fontWeight: 700,
+              letterSpacing: "0.03em",
+              whiteSpace: "nowrap",
+            }}
+          >
+            MINERVIUM
+          </span>
+        )}
+      </button>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {NAV_ITEMS.map((item) => {
@@ -47,12 +105,16 @@ export default function DashboardSidebar({ active, onNavigate, profile }) {
             <button
               key={item.key}
               onClick={() => onNavigate(item.key)}
+              title={collapsed ? item.label : undefined}
+              aria-label={collapsed ? item.label : undefined}
+              aria-current={isActive ? "page" : undefined}
               style={{
                 position: "relative",
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
-                padding: "9px 10px",
+                padding: collapsed ? "10px 0" : "9px 10px",
+                justifyContent: collapsed ? "center" : "flex-start",
                 borderRadius: 8,
                 background: isActive
                   ? "linear-gradient(90deg, rgba(8,147,152,0.88), rgba(8,111,119,0.78))"
@@ -68,9 +130,9 @@ export default function DashboardSidebar({ active, onNavigate, profile }) {
               onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = "rgba(255,255,255,0.03)"; }}
               onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
             >
-              <Icon size={16} />
-              {item.label}
-              {isActive && (
+              <Icon size={16} style={{ flex: "none" }} />
+              {!collapsed && <span style={{ whiteSpace: "nowrap" }}>{item.label}</span>}
+              {isActive && !collapsed && (
                 <span
                   style={{
                     position: "absolute",
@@ -89,8 +151,19 @@ export default function DashboardSidebar({ active, onNavigate, profile }) {
         })}
       </div>
 
-      <div style={{ marginTop: "auto", paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", gap: 8 }}>
+      <div
+        style={{
+          marginTop: "auto",
+          paddingTop: 16,
+          borderTop: "1px solid rgba(255,255,255,0.06)",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          justifyContent: collapsed ? "center" : "flex-start",
+        }}
+      >
         <div
+          title={collapsed ? profile?.my_name || "Unnamed" : undefined}
           style={{
             width: 32, height: 32, borderRadius: "50%",
             background: "linear-gradient(135deg, #1BD5D3, #07949B)",
@@ -100,13 +173,25 @@ export default function DashboardSidebar({ active, onNavigate, profile }) {
         >
           {(profile?.my_name || "?").trim().charAt(0).toUpperCase()}
         </div>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ color: "#FFFFFF", fontSize: 12.5, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {profile?.my_name || "Unnamed"}
-          </div>
-          <div style={{ color: "#5C6870", fontSize: 11 }}>{profile?.my_position || "Team Member"}</div>
-        </div>
-        <ChevronDown size={14} color="#5C6870" style={{ marginLeft: "auto" }} />
+
+        {!collapsed && (
+          <>
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  color: "#FFFFFF", fontSize: 12.5, fontWeight: 600,
+                  whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                }}
+              >
+                {profile?.my_name || "Unnamed"}
+              </div>
+              <div style={{ color: "#5C6870", fontSize: 11 }}>
+                {profile?.my_position || "Team Member"}
+              </div>
+            </div>
+            <ChevronDown size={14} color="#5C6870" style={{ marginLeft: "auto", flex: "none" }} />
+          </>
+        )}
       </div>
     </div>
   );
