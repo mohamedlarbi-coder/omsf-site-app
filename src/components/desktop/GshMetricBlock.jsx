@@ -35,6 +35,7 @@ export default function GshMetricBlock({
   currentMonth,
   firstLive = -1,
   note,
+  narrow = false,
 }) {
   const { rows, totals, grandTotal } = matrix;
 
@@ -65,7 +66,7 @@ export default function GshMetricBlock({
         background: "#0d1b26",
         border: "1px solid rgba(160,190,204,0.14)",
         borderRadius: 12,
-        padding: 16,
+        padding: narrow ? 12 : 16,
         minWidth: 0,
       }}
     >
@@ -156,6 +157,7 @@ export default function GshMetricBlock({
           labels={MONTH_LABELS}
           through={currentMonth + 1}
           firstLive={firstLive}
+          narrow={narrow}
         />
       </div>
 
