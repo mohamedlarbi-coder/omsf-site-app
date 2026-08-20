@@ -27,6 +27,10 @@ import {
 
    Metrics requiring data the app does not capture (TRIFR, incident rate,
    man-hours, action closure) render as unavailable rather than as a number.
+
+   Scope note: this page covers reports filed in the app. The twelve-month
+   GSH view linked at the top also carries the Jan–Jul 2026 history from the
+   monthly report, which exists only as monthly totals.
 --------------------------------------------------------------------------- */
 
 const TYPE_COLORS = {
@@ -251,6 +255,40 @@ export default function StatsView({ reports = [], profiles = [], setView }) {
             {" · "}
             <strong style={{ color: "#13DCE5" }}>{filtered.length}</strong> reports
           </div>
+
+          {/* The GSH view is a different scope: twelve months including the
+              pre-app history, unfiltered by the controls above. Kept as a
+              separate screen rather than a tab so the two are never confused. */}
+          <button
+            onClick={() => setView("gsh-trends")}
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 10,
+              minHeight: 54,
+              padding: "12px 16px",
+              marginBottom: 20,
+              borderRadius: 16,
+              background: "rgba(2,18,23,0.88)",
+              border: "1px solid rgba(20,220,229,0.22)",
+              color: "#F5F7F7",
+              font: "inherit",
+              textAlign: "left",
+              cursor: "pointer",
+            }}
+          >
+            <span style={{ minWidth: 0 }}>
+              <span style={{ display: "block", fontSize: 14, fontWeight: 600 }}>
+                GSH Key Metric Dashboard
+              </span>
+              <span style={{ display: "block", color: "#9AA5AA", fontSize: 11.5, marginTop: 2 }}>
+                Twelve-month trends, including pre-app history
+              </span>
+            </span>
+            <span style={{ color: "#13DCE5", fontSize: 18, flexShrink: 0 }}>›</span>
+          </button>
 
           {filtered.length === 0 ? (
             <Panel style={{ textAlign: "center", padding: "34px 20px" }}>
