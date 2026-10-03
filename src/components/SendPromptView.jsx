@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Check, Send, Copy, Loader2 } from "lucide-react";
 import { buildReportEmail } from "../lib/constants";
+import { buildReportPdf } from "../lib/reportPdf";
 import { supabase } from "../supabaseClient";
 import BackgroundWatermark from "./BackgroundWatermark";
 
@@ -38,6 +39,10 @@ export default function SendPromptView({ profile, pendingSendReport, setPendingS
   // send-report-email Edge Function — no Gmail/Outlook window opens.
   // Requires that function to be deployed with a Resend API key
   // configured (see supabase/functions/send-report-email/index.ts).
+  //
+  // The PDF is built right here in the browser (same layout as the "PDF"
+  // button on the report detail screen) and sent along as base64 — the
+  // Edge Function doesn't generate it, it only attaches what we hand it.
   async function sendNow() {
     const to = getRecipients();
     if (to.length === 0) {
@@ -46,8 +51,13 @@ export default function SendPromptView({ profile, pendingSendReport, setPendingS
     }
     setSending(true);
     try {
+      const pdfDoc = await buildReportPdf(pendingSendReport, profile);
+      const pdfBase64 = pdfDoc.output("datauristring").split(",")[1];
+      const safeLoc = (pendingSendReport.location || "report").replace(/[^a-z0-9]+/gi, "_").slice(0, 40);
+      const pdfFilename = `Hazard_Report_${safeLoc}_${pendingSendReport.report_date}.pdf`;
+
       const { data, error } = await supabase.functions.invoke("send-report-email", {
-        body: { to, report: pendingSendReport, profile },
+        body: { to, report: pendingSendReport, profile, pdfBase64, pdfFilename },
       });
       if (error || data?.error) {
         showToast && showToast("Couldn't send automatically — try 'Copy Email Content' instead");
@@ -55,6 +65,7 @@ export default function SendPromptView({ profile, pendingSendReport, setPendingS
         showToast && showToast("Report emailed automatically");
       }
     } catch (err) {
+      console.error(err);
       showToast && showToast("Couldn't send automatically — try 'Copy Email Content' instead");
     }
     setSending(false);

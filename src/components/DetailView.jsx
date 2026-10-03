@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { ChevronLeft, FileDown, Send, Trash2, Loader2, MapPin } from "lucide-react";
+import { ChevronLeft, FileDown, FileText, Send, Trash2, Loader2, MapPin } from "lucide-react";
 import { riskBarInfo, buildReportEmail, getDocxLib, compositePinOnMap, REPORT_TYPES, RISK_RATINGS, HAZARD_CLASSES, TRACKING_TYPES, CONTRIBUTING_FACTORS } from "../lib/constants";
+import { previewReportPdf } from "../lib/reportPdf";
 import BackgroundWatermark from "./BackgroundWatermark";
 
 function RiskBar({ riskRatingKey }) {
@@ -19,6 +20,7 @@ function RiskBar({ riskRatingKey }) {
 export default function DetailView({ profile, activeReport, setView, deleteReport, showToast, subcontractors = [], isDesktop }) {
   const backView = isDesktop ? "observations-desktop" : "log";
   const [exporting, setExporting] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
   const r = activeReport;
   if (!r) {
     setView(backView);
@@ -28,6 +30,18 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
   function sendEmail() {
     const link = buildReportEmail(r, profile, subcontractors);
     window.location.href = link;
+  }
+
+  async function viewPdf() {
+    setExportingPdf(true);
+    try {
+      await previewReportPdf(r, profile);
+    } catch (e) {
+      console.error(e);
+      showToast("PDF preview failed — try again");
+    } finally {
+      setExportingPdf(false);
+    }
   }
 
   async function exportDocx() {
@@ -267,6 +281,10 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
           </div>
 
           <div className="flex gap-2 pt-2">
+            <button onClick={viewPdf} disabled={exportingPdf} className="flex-1 bg-teal-700 hover:bg-teal-800 disabled:opacity-60 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2">
+              {exportingPdf ? <Loader2 size={18} className="animate-spin" /> : <FileText size={18} />}
+              {exportingPdf ? "Building…" : "PDF"}
+            </button>
             <button onClick={exportDocx} disabled={exporting} className="flex-1 bg-stone-800 hover:bg-stone-900 disabled:opacity-60 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2">
               {exporting ? <Loader2 size={18} className="animate-spin" /> : <FileDown size={18} />}
               {exporting ? "Generating…" : "Word"}

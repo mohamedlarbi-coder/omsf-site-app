@@ -21,7 +21,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 Deno.serve(async (req) => {
   try {
-    const { to, report, profile } = await req.json();
+    const { to, report, profile, pdfBase64, pdfFilename } = await req.json();
 
     if (!to || to.length === 0) {
       return new Response(JSON.stringify({ error: "No recipients provided" }), { status: 400 });
@@ -60,6 +60,13 @@ ${report.project || ""}
 
     const subject = `[MINERVIUM] ${report.report_type || "Safety"} Report — ${report.location || "OMSF"}`;
 
+    // The PDF is built client-side (same layout as the "PDF" button on the
+    // report detail screen) and handed to us already-encoded — this function
+    // never generates the PDF itself, it just attaches what it was given.
+    const attachments = pdfBase64
+      ? [{ filename: pdfFilename || `Report_${report.report_date || "report"}.pdf`, content: pdfBase64 }]
+      : [];
+
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -71,6 +78,7 @@ ${report.project || ""}
         to,
         subject,
         text: body,
+        ...(attachments.length ? { attachments } : {}),
       }),
     });
 
