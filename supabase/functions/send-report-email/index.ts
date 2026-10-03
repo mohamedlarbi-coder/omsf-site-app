@@ -19,12 +19,30 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+// CORS: the browser sends a preflight OPTIONS request before the real POST
+// (supabase.functions.invoke always triggers one, since it sets custom
+// headers). Without these headers that preflight fails and the browser
+// never even attempts the real request — it shows up in the logs as
+// "OPTIONS | 500" and the app reports "Couldn't send automatically".
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
   try {
     const { to, report, profile, pdfBase64, pdfFilename } = await req.json();
 
     if (!to || to.length === 0) {
-      return new Response(JSON.stringify({ error: "No recipients provided" }), { status: 400 });
+      return new Response(JSON.stringify({ error: "No recipients provided" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const dateTime = new Date(report.created_at || Date.now()).toLocaleString("en-CA", {
@@ -85,12 +103,20 @@ ${report.project || ""}
     if (!res.ok) {
       const errText = await res.text();
       console.error("Resend error:", errText);
-      return new Response(JSON.stringify({ error: errText }), { status: 500 });
+      return new Response(JSON.stringify({ error: errText }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    return new Response(JSON.stringify({ sent: true }), { headers: { "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ sent: true }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (err) {
     console.error(err);
-    return new Response(JSON.stringify({ error: String(err) }), { status: 500 });
+    return new Response(JSON.stringify({ error: String(err) }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
