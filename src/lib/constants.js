@@ -18,17 +18,13 @@ export const BUILDING_OPTIONS_BY_SITE = {
   // SUSS has no fixed building list yet — falls back to free text in the form.
 };
 
-// Placeholder safety manager emails per site — replace these with the real
-// list once provided. When a user selects a site during onboarding, these
-// are pre-filled into their distribution list (they can still edit/add to
-// it before saving).
+// Safety manager emails per site, pre-filled into a new user's distribution
+// list during onboarding (they can still edit/add to it before saving).
+// No real list has been provided yet for either site, so this stays empty —
+// add real addresses here once they're known.
 export const DEFAULT_DISTRIBUTION_LIST_BY_SITE = {
-  OMSF: [
-    "safety.manager1@placeholder.com",
-    "safety.manager2@placeholder.com",
-    "safety.manager3@placeholder.com",
-  ],
-  // SUSS: [] — add once provided.
+  OMSF: [],
+  SUSS: [],
 };
 
 export const HAZARD_CLASSES = [
