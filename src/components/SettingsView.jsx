@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { ChevronLeft, ChevronRight, User, Send, MapPin, Check, LogOut, Loader2, Building2 } from "lucide-react";
 import { compressImage } from "../lib/constants";
 import BackgroundWatermark from "./BackgroundWatermark";
+import InstallAppCard from "./InstallAppCard";
 
 function TextField({ label, value, onChange, placeholder, type = "text", required }) {
   return (
@@ -138,6 +139,8 @@ export default function SettingsView({ profile, siteMapUrl, updateMyProfile, han
             {siteMapUrl && <img src={siteMapUrl} className="w-full h-32 object-cover rounded-lg border border-slate-800" />}
             <SiteMapUpload currentUrl={siteMapUrl} onUpload={handleUploadSiteMap} />
           </div>
+
+          <InstallAppCard />
 
           <button onClick={handleSave} disabled={saving}
             className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-400 hover:to-cyan-500 disabled:opacity-60 text-white font-bold tracking-wide py-3 rounded-xl flex items-center justify-center gap-2">
