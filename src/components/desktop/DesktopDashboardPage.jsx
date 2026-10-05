@@ -94,7 +94,7 @@ export default function DesktopDashboardPage({ profile, reports, siteMapUrl, set
           <DashboardRecentObservations reports={reports} onViewAll={() => setView("log")} />
         </div>
 
-        <DashboardProjectMap reports={reports} siteMapUrl={siteMapUrl} onViewFullMap={() => comingSoon("Full project map")} />
+        <DashboardProjectMap reports={reports} siteMapUrl={siteMapUrl} onViewFullMap={() => setView("project-map-desktop")} />
       </div>
       </div>
     </div>

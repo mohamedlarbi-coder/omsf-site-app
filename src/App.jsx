@@ -11,6 +11,7 @@ import DashboardObservationsPage from "./components/desktop/DashboardObservation
 import DashboardActionsPage from "./components/desktop/DashboardActionsPage";
 import DashboardInspectionsPage from "./components/desktop/DashboardInspectionsPage";
 import DashboardAnalyticsPage from "./components/desktop/DashboardAnalyticsPage";
+import DashboardProjectMapPage from "./components/desktop/DashboardProjectMapPage";
 import FormView from "./components/FormView";
 import DetailView from "./components/DetailView";
 import SettingsView from "./components/SettingsView";
@@ -301,6 +302,7 @@ export default function App() {
       {view === "actions-desktop" && <DashboardActionsPage {...commonProps} />}
       {view === "inspections-desktop" && <DashboardInspectionsPage {...commonProps} />}
       {view === "analytics-desktop" && <DashboardAnalyticsPage {...commonProps} />}
+      {view === "project-map-desktop" && <DashboardProjectMapPage {...commonProps} />}
       {view === "log" && <LogView {...commonProps} />}
       {view === "form" && <FormView {...commonProps} />}
       {view === "detail" && <DetailView {...commonProps} />}
