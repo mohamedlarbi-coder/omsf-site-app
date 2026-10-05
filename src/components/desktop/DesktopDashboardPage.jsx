@@ -13,7 +13,7 @@ import DashboardProjectMap from "./DashboardProjectMap";
    exists; a few KPIs (Closed Actions, Participants, Safety
    Improvement) are placeholders since those features aren't built
    yet — see DashboardKPICards for the exact breakdown. */
-export default function DesktopDashboardPage({ profile, reports, setView, showToast }) {
+export default function DesktopDashboardPage({ profile, reports, siteMapUrl, setView, showToast }) {
   function comingSoon(feature) {
     showToast(`${feature} isn't built yet — coming soon`);
   }
@@ -94,7 +94,7 @@ export default function DesktopDashboardPage({ profile, reports, setView, showTo
           <DashboardRecentObservations reports={reports} onViewAll={() => setView("log")} />
         </div>
 
-        <DashboardProjectMap onViewFullMap={() => comingSoon("Full project map")} />
+        <DashboardProjectMap reports={reports} siteMapUrl={siteMapUrl} onViewFullMap={() => comingSoon("Full project map")} />
       </div>
       </div>
     </div>
