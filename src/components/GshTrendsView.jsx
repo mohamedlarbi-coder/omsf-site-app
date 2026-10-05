@@ -262,18 +262,27 @@ export default function GshTrendsView({ reports = [], setView }) {
 
 /* Headline figure with its arithmetic shown. The monthly report prints a
    total that has to be trusted; here the components are listed so the number
-   can be checked at a glance. */
-function SummaryCard({ matrix, currentMonth }) {
-  const total = matrix.totals[currentMonth] || 0;
-  const prev = currentMonth > 0 ? matrix.totals[currentMonth - 1] || 0 : 0;
-  const delta = prev ? Math.round(((total - prev) / prev) * 100) : null;
+   can be checked at a glance.
 
-  const byCode = Object.fromEntries(
-    matrix.rows.map((r) => [r.code, r.values[currentMonth] || 0])
+   The headline is the year-to-date total (every month through the last
+   reported one), not a single month's count — "Total GSH Reports" means
+   total, and a one-month figure buried that. The current month's own count
+   still shows underneath as the recent-activity line. */
+function SummaryCard({ matrix, currentMonth }) {
+  const monthTotal = matrix.totals[currentMonth] || 0;
+  const prev = currentMonth > 0 ? matrix.totals[currentMonth - 1] || 0 : 0;
+  const delta = prev ? Math.round(((monthTotal - prev) / prev) * 100) : null;
+
+  const ytdByCode = Object.fromEntries(
+    matrix.rows.map((r) => [
+      r.code,
+      r.values.slice(0, currentMonth + 1).reduce((a, v) => a + v, 0),
+    ])
   );
-  const gsh = GSH_CODES.reduce((a, c) => a + (byCode[c] || 0), 0);
+  const total = matrix.totals.slice(0, currentMonth + 1).reduce((a, v) => a + v, 0);
+  const gsh = GSH_CODES.reduce((a, c) => a + (ytdByCode[c] || 0), 0);
   const extras = matrix.rows.filter(
-    (r) => !GSH_CODES.includes(r.code) && (r.values[currentMonth] || 0) > 0
+    (r) => !GSH_CODES.includes(r.code) && (ytdByCode[r.code] || 0) > 0
   );
 
   return (
@@ -302,8 +311,11 @@ function SummaryCard({ matrix, currentMonth }) {
         {total}
       </div>
       <div style={{ color: "#9AA5AA", fontSize: 12.5, lineHeight: 1.5 }}>
-        {byCode.ofi || 0} OFI, {byCode.good_spot || 0} Good Spots and{" "}
-        {byCode.hazard_report || 0} Hazards in {MONTH_LABELS[currentMonth]}.
+        {ytdByCode.ofi || 0} OFI, {ytdByCode.good_spot || 0} Good Spots and{" "}
+        {ytdByCode.hazard_report || 0} Hazards, Jan–{MONTH_LABELS[currentMonth]}.
+      </div>
+      <div style={{ color: "#9AA5AA", fontSize: 11.5, marginTop: 6 }}>
+        {monthTotal} in {MONTH_LABELS[currentMonth]} alone
         {delta !== null && (
           <span
             style={{
@@ -330,11 +342,11 @@ function SummaryCard({ matrix, currentMonth }) {
         }}
       >
         <div style={{ color: "#13DCE5", fontSize: 12, fontWeight: 700, marginBottom: 6 }}>
-          Reconciliation
+          Reconciliation (YTD)
         </div>
         <Row label="OFI + Good Spot + Hazards" value={gsh} />
         {extras.map((r) => (
-          <Row key={r.code} label={`+ ${r.label.toLowerCase()}`} value={r.values[currentMonth]} />
+          <Row key={r.code} label={`+ ${r.label.toLowerCase()}`} value={ytdByCode[r.code]} />
         ))}
         <div
           style={{
