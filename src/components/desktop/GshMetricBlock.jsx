@@ -14,6 +14,12 @@ const cell = {
   borderBottom: "1px solid rgba(160,190,204,0.07)",
   textAlign: "right",
   fontVariantNumeric: "tabular-nums",
+  // Base colour for an ordinary reported-month number. cellStyle() below
+  // overrides this for greyed-out (not-yet-reported), zero, peak and
+  // current-month cells — without it, an untouched cell had no colour at
+  // all and fell back to the browser default (black), unreadable on this
+  // dark background.
+  color: "#D5D8DC",
 };
 
 const head = {
