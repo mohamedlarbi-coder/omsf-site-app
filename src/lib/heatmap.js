@@ -85,6 +85,14 @@ export function drawHeat(canvas, points, pointRadius = 42) {
   ctx.putImageData(img, 0, 0);
 }
 
+/** Colour for a 0–1 intensity on the same cold→hot scale as the map overlay.
+ *  Used by non-map heat displays (e.g. the per-building tiles) so both read
+ *  as one scale. */
+export function heatColor(t) {
+  const idx = Math.max(0, Math.min(255, Math.round(t * 255))) * 4;
+  return `rgba(${GRADIENT_LUT[idx]}, ${GRADIENT_LUT[idx + 1]}, ${GRADIENT_LUT[idx + 2]}, ${(GRADIENT_LUT[idx + 3] / 255).toFixed(2)})`;
+}
+
 export function isValidPin(pin) {
   return (
     pin &&

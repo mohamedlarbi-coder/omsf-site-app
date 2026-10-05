@@ -3,6 +3,7 @@ import { Bell } from "lucide-react";
 import DashboardSidebar from "./DashboardSidebar";
 import GshMetricBlock from "./GshMetricBlock";
 import GshTrendAnalysis from "./GshTrendAnalysis";
+import DashboardLocationHeat from "./DashboardLocationHeat";
 import {
   DOMAINS,
   MONTH_LABELS,
@@ -33,7 +34,7 @@ const COMBINED_ONLY_NOTE =
   "Before app capture this table exists only at project level in the source " +
   "report, so the site filter does not apply to those months.";
 
-export default function DashboardAnalyticsPage({ profile, reports = [], setView, showToast }) {
+export default function DashboardAnalyticsPage({ profile, reports = [], siteMapUrl, setView, showToast }) {
   const [year] = useState(() => new Date().getFullYear());
   const [site, setSite] = useState("RSSOM");
   const [data, setData] = useState(null);
@@ -242,6 +243,20 @@ export default function DashboardAnalyticsPage({ profile, reports = [], setView,
                 factorMatrix={matrices.factor}
                 currentMonth={currentMonth}
               />
+
+              <p
+                style={{
+                  margin: "28px 0 11px",
+                  color: "#25E0DE",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Where hazards concentrate
+              </p>
+              <DashboardLocationHeat reports={reports} siteMapUrl={siteMapUrl} site={site} />
 
               <p style={{ marginTop: 20, color: "#5C6870", fontSize: 10.5, lineHeight: 1.6 }}>
                 Highlighted column = current reporting period. Amber = twelve-month peak for
