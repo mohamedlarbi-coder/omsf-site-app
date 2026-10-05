@@ -1,5 +1,16 @@
 export const REPORT_TYPES = ["OFI", "Good Spot", "Hazard", "Closecall"];
 
+/* Pre-production guard: Mohamed asked (Oct 2026) that reports filed just to
+   test the app — description is literally "Test" — not count anywhere in
+   the app (Site Statistics, GSH dashboard) while the team isn't filing real
+   reports yet. Matches "Test"/"test" with or without trailing whitespace;
+   does not touch anything the GSH monthly rollup already supplies.
+   Remove this filter once real on-site reporting begins — he said he'd
+   flag that point explicitly. */
+export function isDemoReport(report) {
+  return (report?.description || "").trim().toLowerCase() === "test";
+}
+
 /* Cascading location structure:
    Project -> auto-fills the Company options
    Site -> if it has a fixed building list, show a dropdown; otherwise free text. */

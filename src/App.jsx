@@ -24,6 +24,7 @@ import SendPromptView from "./components/SendPromptView";
 import ContactsView from "./components/ContactsView";
 import OnboardingView from "./components/OnboardingView";
 import { Loader2 } from "lucide-react";
+import { isDemoReport } from "./lib/constants";
 
 export default function App() {
   const [session, setSession] = useState(undefined); // undefined = loading, null = logged out
@@ -112,7 +113,7 @@ export default function App() {
       .from("reports")
       .select("*")
       .order("created_at", { ascending: false });
-    if (!error) setReports(data || []);
+    if (!error) setReports((data || []).filter((r) => !isDemoReport(r)));
   }
 
   async function loadSiteMap() {
