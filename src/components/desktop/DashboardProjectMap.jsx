@@ -35,7 +35,7 @@ export default function DashboardProjectMap({ reports = [], siteMapUrl, onViewFu
           <img
             src={siteMapUrl}
             alt="Site map"
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.75 }}
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", opacity: 0.8 }}
             draggable={false}
           />
         ) : (

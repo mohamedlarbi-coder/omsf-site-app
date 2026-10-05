@@ -56,12 +56,22 @@ export default function DashboardProjectMapPage({ profile, reports = [], siteMap
         </div>
 
         <div style={{ background: "#0d1b26", border: "1px solid rgba(160,190,204,0.14)", borderRadius: 16, padding: 18, marginBottom: 20 }}>
-          <div style={{ position: "relative", height: 460, backgroundColor: "#08131D", borderRadius: 10, overflow: "hidden" }}>
+          <div
+            style={{
+              position: "relative",
+              height: "calc(100vh - 260px)",
+              minHeight: 360,
+              maxHeight: 640,
+              backgroundColor: "#08131D",
+              borderRadius: 10,
+              overflow: "hidden",
+            }}
+          >
             {siteMapUrl ? (
               <img
                 src={siteMapUrl}
                 alt="Site map"
-                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.75 }}
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", opacity: 0.8 }}
                 draggable={false}
               />
             ) : (

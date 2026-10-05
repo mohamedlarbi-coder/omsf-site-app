@@ -49,7 +49,7 @@ export default function ObservationMapPicker({ location, onLocationChange, pin, 
         }}
       >
         {siteMapUrl ? (
-          <img ref={imgRef} src={siteMapUrl} alt="Site map" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }} draggable={false} />
+          <img ref={imgRef} src={siteMapUrl} alt="Site map" style={{ width: "100%", height: "100%", objectFit: "contain", opacity: 0.9 }} draggable={false} />
         ) : (
           <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, color: "#5C6870" }}>
             <MapPin size={22} />
