@@ -286,13 +286,21 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
     }
   }
 
+  const aiRun = useRef(0); // lets "Skip" / a newer run cancel an older one
+
   async function runAiDraft(key, { force = false } = {}) {
+    const myRun = ++aiRun.current;
+    const stale = () => aiRun.current !== myRun;
     setAiDraft({ status: "loading", confirmed: false, key });
     try {
       const image = await downscaleForAi(draft.photo_data_url);
-      const { data, error } = await supabase.functions.invoke("ai-assist", {
+      const call = supabase.functions.invoke("ai-assist", {
         body: { mode: "draft", context: aiContext(draft), image },
       });
+      // Never leave the spinner hanging: give up after 25 s and offer a retry.
+      const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 25000));
+      const { data, error } = await Promise.race([call, timeout]);
+      if (stale()) return;
       if (error || data?.error || !data?.description) {
         setAiDraft({ status: data?.error === "not_configured" ? "off" : "error", confirmed: false, key });
         return;
@@ -302,8 +310,13 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
         : { ...d, description: data.description, safety_concern: data.safety_concern || "", ai_generated: true }));
       setAiDraft({ status: "ready", confirmed: false, key });
     } catch {
-      setAiDraft({ status: "error", confirmed: false, key });
+      if (!stale()) setAiDraft({ status: "error", confirmed: false, key });
     }
+  }
+
+  function skipAiDraft() {
+    aiRun.current += 1; // ignore whatever comes back
+    setAiDraft((s) => ({ ...s, status: "idle", confirmed: true }));
   }
 
   useEffect(() => {
@@ -498,7 +511,9 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
             <SectionTitle icon={AlertTriangle}>Description</SectionTitle>
             {aiDraft.status === "loading" && (
               <div className="rounded-xl border border-teal-500/30 bg-[#0d1b26] p-3 text-sm text-teal-300 flex items-center gap-2">
-                <Loader2 size={15} className="animate-spin" /> Preparing a first draft from your photo and report type…
+                <Loader2 size={15} className="animate-spin shrink-0" />
+                <span className="flex-1">Preparing a first draft from your photo and report type…</span>
+                <button type="button" onClick={skipAiDraft} className="underline text-slate-300 shrink-0">Skip</button>
               </div>
             )}
             {aiDraft.status === "ready" && (
@@ -532,7 +547,10 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
               </div>
             )}
             <TextArea label="Description" required rows={5} value={draft.description} onChange={(v) => editField("description", v)} />
-            <AiAssistButton mode="description" label="Help me write this" canRun={draft.description.trim().length >= 5}
+            <AiAssistButton mode="description" canRun
+              label={draft.description.trim().length >= 5 ? "Improve my text" : "Write it for me"}
+              isEmpty={draft.description.trim().length < 5}
+              onEmpty={() => runAiDraft(aiDraft.key || `${draft.report_type}|${draft.location}`, { force: true })}
               context={aiContext(draft)} onUse={(t) => setDraft({ ...draft, description: t, ai_generated: true })} />
             <SelectField
               label="Subcontractor"
@@ -599,7 +617,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
               <SectionTitle>Corrective Action</SectionTitle>
               <div className="space-y-3">
                 <TextArea label="Corrective Action" rows={4} value={draft.corrective_action} onChange={(v) => setDraft({ ...draft, corrective_action: v })} />
-                <AiAssistButton mode="corrective" label="Suggest a corrective action" canRun={draft.description.trim().length >= 5}
+                <AiAssistButton mode="corrective" label="Suggest a corrective action" canRun
                   context={aiContext(draft)} onUse={(t) => setDraft({ ...draft, corrective_action: t, ai_generated: true })} />
                 <div className="grid grid-cols-2 gap-3">
                   <TextField label="Action Owner" value={draft.corrective_action_owner} onChange={(v) => setDraft({ ...draft, corrective_action_owner: v })} />

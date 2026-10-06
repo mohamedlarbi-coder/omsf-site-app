@@ -74,7 +74,11 @@ Deno.serve(async (req) => {
     }
     content.push({ type: "text", text: buildPrompt(mode, context) });
 
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 20000);
+    const started = Date.now();
     const res = await fetch("https://api.anthropic.com/v1/messages", {
+      signal: ctrl.signal,
       method: "POST",
       headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
       body: JSON.stringify({
@@ -84,6 +88,8 @@ Deno.serve(async (req) => {
         messages: [{ role: "user", content }],
       }),
     });
+    clearTimeout(timer);
+    console.log(`ai-assist ${mode} took ${Date.now() - started}ms (photo: ${content.length > 1})`);
     if (!res.ok) {
       console.error("Anthropic error:", res.status, await res.text());
       return json({ error: "ai_unavailable" }, 502);
@@ -102,6 +108,6 @@ Deno.serve(async (req) => {
     return json({ text });
   } catch (err) {
     console.error(err);
-    return json({ error: "server_error" }, 500);
+    return json({ error: err instanceof DOMException && err.name === "AbortError" ? "timeout" : "server_error" }, 500);
   }
 });

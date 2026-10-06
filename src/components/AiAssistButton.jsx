@@ -11,12 +11,13 @@ const MESSAGES = {
   needs_description: "Write the description first, then I can suggest the action.",
 };
 
-export default function AiAssistButton({ mode, context, onUse, label, canRun = true, dark = true }) {
+export default function AiAssistButton({ mode, context, onUse, label, canRun = true, isEmpty = false, onEmpty }) {
   const [busy, setBusy] = useState(false);
   const [suggestion, setSuggestion] = useState("");
   const [error, setError] = useState("");
 
   async function run() {
+    if (isEmpty && onEmpty) { onEmpty(); return; }
     setBusy(true); setError(""); setSuggestion("");
     try {
       const { data, error: fnError } = await supabase.functions.invoke("ai-assist", { body: { mode, context } });
@@ -41,7 +42,7 @@ export default function AiAssistButton({ mode, context, onUse, label, canRun = t
         disabled={busy || !canRun}
         style={{
           display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 10,
-          background: "rgba(24,201,203,0.10)", border: "1px solid rgba(24,201,203,0.35)", color: "#18C9CB",
+          background: "rgba(24,201,203,0.16)", border: "1px solid rgba(24,201,203,0.6)", color: "#25E0DE",
           fontSize: 13, fontWeight: 600, cursor: busy || !canRun ? "default" : "pointer", opacity: canRun ? 1 : 0.5, font: "inherit",
         }}
       >
@@ -49,6 +50,9 @@ export default function AiAssistButton({ mode, context, onUse, label, canRun = t
         {busy ? "Writing…" : label}
       </button>
 
+      {!suggestion && !error && !busy && mode === "corrective" && !context.description?.trim() && (
+        <div style={{ marginTop: 6, fontSize: 12, color: "#73828B" }}>Fill in the description first — the suggestion is based on it.</div>
+      )}
       {error && <div style={{ marginTop: 6, fontSize: 12, color: "#E0A80F" }}>{error}</div>}
 
       {suggestion && (
