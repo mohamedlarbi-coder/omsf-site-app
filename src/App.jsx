@@ -374,7 +374,13 @@ export default function App() {
             if (saved) {
               showToast("Observation submitted");
               setObservationDraft(null);
-              setView("log");
+              // Same send step as the mobile form: distribution list + a copy to the submitter.
+              if (profile?.email || (profile?.distribution_list || "").trim()) {
+                setPendingSendReport(saved);
+                setView("send");
+              } else {
+                setView("log");
+              }
             }
           }}
         />
