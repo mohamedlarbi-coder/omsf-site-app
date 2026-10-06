@@ -81,6 +81,7 @@ export const DOMAINS = {
   CLASS: "hazard_class",
   TRACKING: "tracking",
   FACTOR: "factor",
+  ENGAGEMENT: "engagement", // who filed the report (HS Team, Supervisors, Metrolinx …)
 };
 
 /* Which report field feeds each domain, and whether it is multi-select. */
@@ -174,7 +175,11 @@ export function buildYearMatrix({
   }
 
   /* Live half */
-  const { field, multi, map } = DOMAIN_SOURCE[domain];
+  // Engagement (reporter group) is history-only for now: live reports do not
+  // record which group the submitter belongs to.
+  const src = DOMAIN_SOURCE[domain];
+  if (!src) return finish(rows);
+  const { field, multi, map } = src;
 
   for (const rep of reports) {
     if (site !== "RSSOM" && rep.site !== site) continue;
@@ -195,6 +200,10 @@ export function buildYearMatrix({
     }
   }
 
+  return finish(rows);
+}
+
+function finish(rows) {
   for (const r of rows) r.total = r.values.reduce((a, b) => a + b, 0);
 
   const totals = Array(12).fill(0);
