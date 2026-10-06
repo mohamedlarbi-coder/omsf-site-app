@@ -1,4 +1,6 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { supabase } from "../supabaseClient";
+import { Sparkles as SparklesIcon } from "lucide-react";
 import {
   X, Check, ChevronLeft, ChevronRight, Camera, Image as ImageIcon,
   AlertTriangle, MapPin, Loader2, ClipboardList,
@@ -244,6 +246,10 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
     return fresh;
   });
   const [gpsStatus, setGpsStatus] = useState("idle");
+  // First AI draft of Description + Safety Concern (built from the photo and the
+  // report details). status: idle | loading | ready | off | error. Nothing moves on
+  // until the person confirms or edits it.
+  const [aiDraft, setAiDraft] = useState({ status: "idle", confirmed: false, key: "" });
   const [saving, setSaving] = useState(false);
 
   function toggleInArray(arr, val) {
@@ -261,6 +267,40 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
     }
   }
 
+  async function runAiDraft(key, { force = false } = {}) {
+    setAiDraft({ status: "loading", confirmed: false, key });
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-assist", {
+        body: { mode: "draft", context: aiContext(draft), image: draft.photo_data_url || null },
+      });
+      if (error || data?.error || !data?.description) {
+        setAiDraft({ status: data?.error === "not_configured" ? "off" : "error", confirmed: false, key });
+        return;
+      }
+      setDraft((d) => (!force && (d.description.trim() || d.safety_concern.trim())
+        ? d
+        : { ...d, description: data.description, safety_concern: data.safety_concern || "", ai_generated: true }));
+      setAiDraft({ status: "ready", confirmed: false, key });
+    } catch {
+      setAiDraft({ status: "error", confirmed: false, key });
+    }
+  }
+
+  useEffect(() => {
+    if (step !== 3) return;
+    const key = `${draft.report_type}|${draft.location}|${draft.photo_data_url ? draft.photo_data_url.length : 0}`;
+    if (aiDraft.key === key) return;
+    if (draft.description.trim() || draft.safety_concern.trim()) { setAiDraft((s) => ({ ...s, key })); return; }
+    runAiDraft(key);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
+  // Editing either box counts as reviewing the draft.
+  const editField = (field, v) => {
+    setDraft({ ...draft, [field]: v });
+    if (aiDraft.status === "ready" && !aiDraft.confirmed) setAiDraft((s) => ({ ...s, confirmed: true }));
+  };
+
   const canNext = () => {
     if (step === 1) {
       const baseValid = draft.project.trim().length > 0 && draft.company.trim().length > 0 && draft.site.trim().length > 0 && draft.location.trim().length > 0;
@@ -272,7 +312,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
       if (draft.company === "Visitor" && !draft.company_visitor_name.trim()) return false;
       return true;
     }
-    if (step === 3) return draft.description.trim().length > 0;
+    if (step === 3) return draft.description.trim().length > 0 && !(aiDraft.status === "ready" && !aiDraft.confirmed) && aiDraft.status !== "loading";
     return true;
   };
 
@@ -436,7 +476,42 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
         return (
           <div className="space-y-5">
             <SectionTitle icon={AlertTriangle}>Description</SectionTitle>
-            <TextArea label="Description" required rows={5} value={draft.description} onChange={(v) => setDraft({ ...draft, description: v })} />
+            {aiDraft.status === "loading" && (
+              <div className="rounded-xl border border-teal-500/30 bg-[#0d1b26] p-3 text-sm text-teal-300 flex items-center gap-2">
+                <Loader2 size={15} className="animate-spin" /> Preparing a first draft from your photo and report type…
+              </div>
+            )}
+            {aiDraft.status === "ready" && (
+              <div className="rounded-xl border border-teal-500/40 bg-[#0d1b26] p-3 space-y-2" style={{ animation: "minervium-slide-in 0.28s ease-out" }}>
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-teal-400">
+                  <SparklesIcon size={13} /> AI first draft
+                </div>
+                <div className="text-sm text-slate-200">
+                  {aiDraft.confirmed
+                    ? "Draft confirmed — you can keep editing the boxes below."
+                    : "I filled in Description and Safety Concern from your photo and report type. Read them, change anything that's wrong, then confirm to continue."}
+                </div>
+                {!aiDraft.confirmed && (
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={() => setAiDraft((s) => ({ ...s, confirmed: true }))}
+                      className="px-3 py-2 rounded-lg bg-teal-500 text-slate-900 text-sm font-bold flex items-center gap-1.5">
+                      <Check size={14} /> Looks good — confirm
+                    </button>
+                    <button type="button" onClick={() => runAiDraft(aiDraft.key, { force: true })}
+                      className="px-3 py-2 rounded-lg border border-slate-600 text-slate-200 text-sm">Regenerate</button>
+                    <button type="button" onClick={() => { setDraft({ ...draft, description: "", safety_concern: "" }); setAiDraft((s) => ({ ...s, status: "idle", confirmed: true })); }}
+                      className="px-3 py-2 rounded-lg border border-slate-600 text-slate-400 text-sm">Clear &amp; write myself</button>
+                  </div>
+                )}
+              </div>
+            )}
+            {aiDraft.status === "error" && (
+              <div className="rounded-xl border border-amber-500/30 bg-[#0d1b26] p-3 text-xs text-amber-300 flex items-center justify-between gap-2">
+                <span>Couldn't prepare a draft — write it yourself, or try again.</span>
+                <button type="button" onClick={() => runAiDraft(aiDraft.key)} className="underline">Retry</button>
+              </div>
+            )}
+            <TextArea label="Description" required rows={5} value={draft.description} onChange={(v) => editField("description", v)} />
             <AiAssistButton mode="description" label="Help me write this" canRun={draft.description.trim().length >= 5}
               context={aiContext(draft)} onUse={(t) => setDraft({ ...draft, description: t, ai_generated: true })} />
             <SelectField
@@ -454,7 +529,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
                 placeholder="Enter subcontractor name"
               />
             )}
-            <TextArea label="Safety Concern" rows={5} value={draft.safety_concern} onChange={(v) => setDraft({ ...draft, safety_concern: v })} />
+            <TextArea label="Safety Concern" rows={5} value={draft.safety_concern} onChange={(v) => editField("safety_concern", v)} />
           </div>
         );
       case 4:

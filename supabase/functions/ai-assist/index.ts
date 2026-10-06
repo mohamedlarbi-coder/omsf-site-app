@@ -35,6 +35,9 @@ function buildPrompt(mode: string, c: Record<string, unknown>) {
     c.safety_concern && `Safety concern noted: ${clip(c.safety_concern)}`,
   ].filter(Boolean).join("\n");
 
+  if (mode === "draft") {
+    return `${facts}\n\nWrite a PRELIMINARY first draft for two form fields, using the attached photo (if there is one) and the details above. The person will review and edit it, so keep it modest and accurate.\n- "description": 2–4 sentences — what is observed and where. For a Good Spot, what was done well.\n- "safety_concern": 1–3 sentences — the potential consequence / why it matters. For a Good Spot, why this practice is valuable.\nDescribe only what you can actually see or were told; if the photo is unclear, stay general. Do not identify or describe people's faces. Reply with ONLY a JSON object: {"description": "...", "safety_concern": "..."}`;
+  }
   if (mode === "description") {
     return `${facts}\n\nThe person's rough notes for the description:\n"""${clip(c.description)}"""\n\nRewrite these notes as a clear, factual observation description of 2–5 sentences: what was observed, where, and why it is a concern (or, for a good spot, what was done well). Keep every fact; add none.`;
   }
@@ -51,25 +54,32 @@ Deno.serve(async (req) => {
     const key = Deno.env.get("ANTHROPIC_API_KEY");
     if (!key) return json({ error: "not_configured" }, 503);
 
-    const { mode, context } = await req.json();
-    if (!["description", "corrective"].includes(mode) || typeof context !== "object" || !context) {
+    const { mode, context, image } = await req.json();
+    if (!["description", "corrective", "draft"].includes(mode) || typeof context !== "object" || !context) {
       return json({ error: "bad_request" }, 400);
     }
-    if (mode === "description" && clip(context.description).trim().length < 5) {
-      return json({ error: "needs_notes" }, 400);
+    if (mode !== "draft" && clip(context.description).trim().length < 5) {
+      return json({ error: mode === "description" ? "needs_notes" : "needs_description" }, 400);
     }
-    if (mode === "corrective" && clip(context.description).trim().length < 5) {
-      return json({ error: "needs_description" }, 400);
+
+    // Optional photo (data URL) — only used by the first-draft mode.
+    const content: unknown[] = [];
+    if (mode === "draft" && typeof image === "string") {
+      const m = image.match(/^data:(image\/(?:jpeg|png|webp|gif));base64,(.+)$/);
+      if (m && m[2].length < 6_000_000) {
+        content.push({ type: "image", source: { type: "base64", media_type: m[1], data: m[2] } });
+      }
     }
+    content.push({ type: "text", text: buildPrompt(mode, context) });
 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 500,
+        max_tokens: mode === "draft" ? 700 : 500,
         system: SYSTEM,
-        messages: [{ role: "user", content: buildPrompt(mode, context) }],
+        messages: [{ role: "user", content }],
       }),
     });
     if (!res.ok) {
@@ -78,6 +88,15 @@ Deno.serve(async (req) => {
     }
     const data = await res.json();
     const text = (data.content || []).filter((b: { type: string }) => b.type === "text").map((b: { text: string }) => b.text).join("").trim();
+    if (mode === "draft") {
+      const j = text.match(/\{[\s\S]*\}/);
+      try {
+        const parsed = JSON.parse(j ? j[0] : "");
+        return json({ description: clip(parsed.description, 1200).trim(), safety_concern: clip(parsed.safety_concern, 1200).trim(), usedPhoto: content.length > 1 });
+      } catch {
+        return json({ error: "ai_unavailable" }, 502);
+      }
+    }
     return json({ text });
   } catch (err) {
     console.error(err);
