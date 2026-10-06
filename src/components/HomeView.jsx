@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { supabase } from "../supabaseClient";
 import { FileText, ShieldCheck, ClipboardCheck, FileBarChart, ChevronRight, Bell, Plus, Calendar } from "lucide-react";
 import BottomTabBar from "./BottomTabBar";
 
@@ -119,6 +120,11 @@ function HexBackground() {
    it yet — see DashboardActionsPage.jsx comments for why it's derived-only on
    desktop and not built here. */
 export default function HomeView({ reports, setView, profile }) {
+  const [openActions, setOpenActions] = useState(0);
+  useEffect(() => {
+    supabase.from("action_items").select("id", { count: "exact", head: true }).eq("status", "Open")
+      .then(({ count }) => setOpenActions(count || 0));
+  }, []);
   const userName = (profile?.my_name || "").split(" ")[0] || "there";
   const initial = (profile?.my_name || "?").trim().charAt(0).toUpperCase();
 
@@ -135,9 +141,9 @@ export default function HomeView({ reports, setView, profile }) {
       id: "actions",
       icon: ShieldCheck,
       title: "Actions",
-      description: "Open actions · Coming soon",
-      count: 0,
-      disabled: true,
+      description: "By trade · open, overdue, closed",
+      count: openActions,
+      onClick: () => setView("actions"),
     },
     {
       id: "inspections",

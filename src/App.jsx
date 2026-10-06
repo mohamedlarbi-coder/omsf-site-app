@@ -8,6 +8,7 @@ import HomeView from "./components/HomeView";
 import InspectionsView from "./components/InspectionsView";
 import DesktopDashboardPage from "./components/desktop/DesktopDashboardPage";
 import DashboardObservationsPage from "./components/desktop/DashboardObservationsPage";
+import ActionsView from "./components/ActionsView";
 import DashboardActionsPage from "./components/desktop/DashboardActionsPage";
 import DashboardInspectionsPage from "./components/desktop/DashboardInspectionsPage";
 import DashboardAnalyticsPage from "./components/desktop/DashboardAnalyticsPage";
@@ -301,6 +302,7 @@ export default function App() {
       {view === "onboarding" && <OnboardingView {...commonProps} />}
       {view === "home" && (isDesktop ? <DesktopDashboardPage {...commonProps} /> : <HomeView {...commonProps} />)}
       {view === "inspections" && <InspectionsView {...commonProps} />}
+      {view === "actions" && <ActionsView {...commonProps} />}
       {view === "observations-desktop" && <DashboardObservationsPage {...commonProps} />}
       {view === "actions-desktop" && <DashboardActionsPage {...commonProps} />}
       {view === "inspections-desktop" && <DashboardInspectionsPage {...commonProps} />}
