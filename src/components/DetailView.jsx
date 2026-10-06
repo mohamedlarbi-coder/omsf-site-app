@@ -295,7 +295,7 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
                 <Send size={18} /> Email
               </button>
             )}
-            {r.author_id === profile.id && (
+            {profile.is_admin && (
               <button onClick={() => { deleteReport(r.id); setView(backView); }} className="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-semibold px-4 rounded-xl flex items-center justify-center">
                 <Trash2 size={18} />
               </button>

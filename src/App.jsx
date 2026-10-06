@@ -98,8 +98,11 @@ export default function App() {
       .eq("id", session.user.id)
       .single();
     if (!error) {
-      setProfile(data);
-      return data;
+      // Admin status is decided by the database (public.is_admin); the UI only mirrors it.
+      const { data: adminFlag } = await supabase.rpc("is_admin");
+      const full = { ...data, is_admin: adminFlag === true };
+      setProfile(full);
+      return full;
     }
     return null;
   }
