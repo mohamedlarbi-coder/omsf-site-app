@@ -187,6 +187,25 @@ function PhotoCapture({ photoDataUrl, onCapture, onClear }) {
   );
 }
 
+// Shrinks the photo before sending it to the AI — it doesn't need full resolution
+// and a smaller upload is much quicker on a phone connection.
+function downscaleForAi(dataUrl, max = 768) {
+  return new Promise((resolve) => {
+    if (!dataUrl) return resolve(null);
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * scale);
+      c.height = Math.round(img.height * scale);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      resolve(c.toDataURL("image/jpeg", 0.7));
+    };
+    img.onerror = () => resolve(null);
+    img.src = dataUrl;
+  });
+}
+
 const aiContext = (d) => ({
   report_type: d.report_type, site: d.site, location: d.location,
   subcontractor: d.subcontractor === "Others" ? d.subcontractor_other : d.subcontractor,
@@ -270,8 +289,9 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
   async function runAiDraft(key, { force = false } = {}) {
     setAiDraft({ status: "loading", confirmed: false, key });
     try {
+      const image = await downscaleForAi(draft.photo_data_url);
       const { data, error } = await supabase.functions.invoke("ai-assist", {
-        body: { mode: "draft", context: aiContext(draft), image: draft.photo_data_url || null },
+        body: { mode: "draft", context: aiContext(draft), image },
       });
       if (error || data?.error || !data?.description) {
         setAiDraft({ status: data?.error === "not_configured" ? "off" : "error", confirmed: false, key });
@@ -287,7 +307,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
   }
 
   useEffect(() => {
-    if (step !== 3) return;
+    if (step < 2 || step > 3) return;
     const key = `${draft.report_type}|${draft.location}|${draft.photo_data_url ? draft.photo_data_url.length : 0}`;
     if (aiDraft.key === key) return;
     if (draft.description.trim() || draft.safety_concern.trim()) { setAiDraft((s) => ({ ...s, key })); return; }

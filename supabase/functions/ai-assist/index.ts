@@ -13,12 +13,14 @@ const corsHeaders = {
 };
 
 const MODEL = "claude-sonnet-5-5";
+// Faster, lighter model for the first draft — the person reviews it anyway.
+const DRAFT_MODEL = "claude-haiku-4-5-20251001";
 
 const SYSTEM = `You help construction site staff write health & safety observation reports for the Ontario Line OMSF / RSSOM project in Ontario, Canada (OHSA context).
 Rules:
-- Use ONLY facts the person gave you. Never invent names, times, measurements, equipment, injuries or regulations. If something important is missing, leave it out rather than guess.
+- Use ONLY facts the person gave you or that are clearly visible in an attached photo. Never invent names, times, measurements, equipment, injuries or regulations. If something important is missing, leave it out rather than guess.
 - Plain, factual, professional language. No blame, no speculation about who is at fault.
-- Output ONLY the text to put in the form field: no preface, no quotes, no markdown headings.`;
+- Output ONLY what is asked for (the text for the form field, or the JSON object when requested): no preface, no quotes, no markdown headings.`;
 
 const clip = (v: unknown, n = 1500) => String(v ?? "").slice(0, n);
 
@@ -36,10 +38,10 @@ function buildPrompt(mode: string, c: Record<string, unknown>) {
   ].filter(Boolean).join("\n");
 
   if (mode === "draft") {
-    return `${facts}\n\nWrite a PRELIMINARY first draft for two form fields, using the attached photo (if there is one) and the details above. The person will review and edit it, so keep it modest and accurate.\n- "description": 2–4 sentences — what is observed and where. For a Good Spot, what was done well.\n- "safety_concern": 1–3 sentences — the potential consequence / why it matters. For a Good Spot, why this practice is valuable.\nDescribe only what you can actually see or were told; if the photo is unclear, stay general. Do not identify or describe people's faces. Reply with ONLY a JSON object: {"description": "...", "safety_concern": "..."}`;
+    return `${facts}\n\nWrite a PRELIMINARY first draft for two form fields, using the attached photo (if there is one) and the details above. The person will review and edit it, so keep it modest and accurate.\n- "description": 2–3 SHORT sentences — just enough words to describe the issue: what is observed and where. For a Good Spot, what was done well.\n- "safety_concern": 2–3 SHORT sentences — the potential consequence / why it matters. For a Good Spot, why this practice is valuable.\nKeep both brief and plain — no padding, no repetition between the two boxes.\nDescribe only what you can actually see or were told; if the photo is unclear, stay general. Do not identify or describe people's faces. Reply with ONLY a JSON object: {"description": "...", "safety_concern": "..."}`;
   }
   if (mode === "description") {
-    return `${facts}\n\nThe person's rough notes for the description:\n"""${clip(c.description)}"""\n\nRewrite these notes as a clear, factual observation description of 2–5 sentences: what was observed, where, and why it is a concern (or, for a good spot, what was done well). Keep every fact; add none.`;
+    return `${facts}\n\nThe person's rough notes for the description:\n"""${clip(c.description)}"""\n\nRewrite these notes as a clear, factual observation description of 2–3 short sentences: what was observed, where, and why it is a concern (or, for a good spot, what was done well). Keep every fact; add none.`;
   }
   // corrective
   return `${facts}\n\nDescription of the observation:\n"""${clip(c.description)}"""\n${c.corrective_action ? `\nCorrective action already typed (improve it, keep its intent):\n"""${clip(c.corrective_action)}"""\n` : ""}\nWrite a corrective action as 2–5 short, specific, actionable steps (immediate control first, then follow-up), as plain lines starting with "- ". Only propose actions that follow directly from the observation. Do not invent owners or dates.`;
@@ -76,8 +78,8 @@ Deno.serve(async (req) => {
       method: "POST",
       headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
       body: JSON.stringify({
-        model: MODEL,
-        max_tokens: mode === "draft" ? 700 : 500,
+        model: mode === "draft" ? DRAFT_MODEL : MODEL,
+        max_tokens: mode === "draft" ? 350 : 400,
         system: SYSTEM,
         messages: [{ role: "user", content }],
       }),
