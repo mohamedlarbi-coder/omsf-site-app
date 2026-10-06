@@ -10,6 +10,7 @@ import {
 } from "../lib/constants";
 import BackgroundWatermark from "./BackgroundWatermark";
 import BuildingPlanPicker from "./BuildingPlanPicker";
+import AiAssistButton from "./AiAssistButton";
 import { planForLocation } from "../lib/constants";
 
 const STEPS = ["Photo", "Type & Location", "Site Map", "Description", "Classification", "Corrective Action", "Review"];
@@ -183,6 +184,13 @@ function PhotoCapture({ photoDataUrl, onCapture, onClear }) {
     </div>
   );
 }
+
+const aiContext = (d) => ({
+  report_type: d.report_type, site: d.site, location: d.location,
+  subcontractor: d.subcontractor === "Others" ? d.subcontractor_other : d.subcontractor,
+  hazard_classes: d.hazard_classes, life_saving_rules: d.life_saving_rules, tracking_types: d.tracking_types,
+  risk_rating: d.risk_rating, safety_concern: d.safety_concern, description: d.description, corrective_action: d.corrective_action,
+});
 
 function SiteMapPicker({ siteMapUrl, pin, onPinChange, gpsStatus }) {
   const imgRef = useRef(null);
@@ -429,6 +437,8 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
           <div className="space-y-5">
             <SectionTitle icon={AlertTriangle}>Description</SectionTitle>
             <TextArea label="Description" required rows={5} value={draft.description} onChange={(v) => setDraft({ ...draft, description: v })} />
+            <AiAssistButton mode="description" label="Help me write this" canRun={draft.description.trim().length >= 5}
+              context={aiContext(draft)} onUse={(t) => setDraft({ ...draft, description: t, ai_generated: true })} />
             <SelectField
               label="Subcontractor"
               value={draft.subcontractor}
@@ -494,6 +504,8 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
               <SectionTitle>Corrective Action</SectionTitle>
               <div className="space-y-3">
                 <TextArea label="Corrective Action" rows={4} value={draft.corrective_action} onChange={(v) => setDraft({ ...draft, corrective_action: v })} />
+                <AiAssistButton mode="corrective" label="Suggest a corrective action" canRun={draft.description.trim().length >= 5}
+                  context={aiContext(draft)} onUse={(t) => setDraft({ ...draft, corrective_action: t, ai_generated: true })} />
                 <div className="grid grid-cols-2 gap-3">
                   <TextField label="Action Owner" value={draft.corrective_action_owner} onChange={(v) => setDraft({ ...draft, corrective_action_owner: v })} />
                   <TextField label="Close Out Date" type="date" value={draft.corrective_close_out_date} onChange={(v) => setDraft({ ...draft, corrective_close_out_date: v })} />

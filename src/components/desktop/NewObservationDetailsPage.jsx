@@ -183,6 +183,11 @@ export default function NewObservationDetailsPage({ initialDraft, onCancel, onBa
             value={draft.description}
             onChange={(v) => setField("description", v)}
             error={shouldShowError("description") ? errors.description : null}
+            aiContext={{
+              report_type: draft.type, location: draft.location, subcontractor: draft.subcontractor === "Others" ? draft.subcontractorOther : draft.subcontractor,
+              tracking_types: draft.trackingType ? [draft.trackingType] : [], hazard_classes: draft.hazardClass ? [draft.hazardClass] : [],
+              life_saving_rules: draft.lifeSavingRule ? [draft.lifeSavingRule] : [],
+            }}
           />
 
           <div>
