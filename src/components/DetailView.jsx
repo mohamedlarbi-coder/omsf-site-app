@@ -268,6 +268,7 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
               ["Description", r.description],
               ["Safety Concern", r.safety_concern],
               ["Hazard Classification", (r.hazard_classes || []).join(", ")],
+              ...((r.life_saving_rules || []).length ? [["Life-Saving Rule Type", r.life_saving_rules.join(", ")]] : []),
               ["Tracking Type", (r.tracking_types || []).join(", ")],
               ["Contributing Factors", (r.contributing_factors || []).join(", ")],
               ["Corrective Action", r.corrective_action],

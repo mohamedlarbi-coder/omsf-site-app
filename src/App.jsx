@@ -356,6 +356,7 @@ export default function App() {
               description: draft.description || "",
               safety_concern: "",
               hazard_classes: draft.hazardClass ? [draft.hazardClass] : [],
+              life_saving_rules: draft.hazardClass === "Life-Saving Rule" && draft.lifeSavingRule ? [draft.lifeSavingRule] : [],
               tracking_types: draft.trackingType ? [draft.trackingType] : [],
               risk_rating: "",
               contributing_factors: [],

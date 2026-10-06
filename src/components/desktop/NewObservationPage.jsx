@@ -27,6 +27,7 @@ function emptyDraft() {
     location: "",
     trackingType: "",
     hazardClass: "",
+    lifeSavingRule: "",
     photos: [],
   };
 }

@@ -106,7 +106,7 @@ export default function NewObservationReviewPage({ draft, onCancel, onBack, onSu
           <ReviewRow label="Title">{draft.title || "—"}</ReviewRow>
           <ReviewRow label="Location">{draft.location || "—"}</ReviewRow>
           <ReviewRow label="Tracking Type">{draft.trackingType || "—"}</ReviewRow>
-          <ReviewRow label="Hazard Class">{draft.hazardClass || "—"}</ReviewRow>
+          <ReviewRow label="Hazard Class">{draft.hazardClass || "—"}{draft.lifeSavingRule ? ` — ${draft.lifeSavingRule}` : ""}</ReviewRow>
           <ReviewRow label="Description">{draft.description || "—"}</ReviewRow>
           <ReviewRow label="Photos" isLast>
             {draft.photos && draft.photos.length > 0 ? (

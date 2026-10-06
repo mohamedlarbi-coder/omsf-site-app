@@ -4,7 +4,7 @@ import {
   AlertTriangle, MapPin, Loader2, ClipboardList,
 } from "lucide-react";
 import {
-  REPORT_TYPES, HAZARD_CLASSES, TRACKING_TYPES, RISK_RATINGS, CONTRIBUTING_FACTORS,
+  REPORT_TYPES, HAZARD_CLASSES, LIFE_SAVING_RULE, LIFE_SAVING_RULE_TYPES, TRACKING_TYPES, RISK_RATINGS, CONTRIBUTING_FACTORS,
   PROJECT_OPTIONS, COMPANY_OPTIONS_BY_PROJECT, SUBCONTRACTOR_OPTIONS, SITE_OPTIONS, BUILDING_OPTIONS_BY_SITE,
   emptyReportForm, compressImage, getGpsPosition, riskBarInfo, resolveCompanyName,
 } from "../lib/constants";
@@ -452,7 +452,17 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
           <div className="space-y-7">
             <div>
               <SectionTitle>Hazard Classification</SectionTitle>
-              <MultiSelectGrid options={HAZARD_CLASSES} selected={draft.hazard_classes} onToggle={(v) => setDraft({ ...draft, hazard_classes: toggleInArray(draft.hazard_classes, v) })} />
+              <MultiSelectGrid options={HAZARD_CLASSES} selected={draft.hazard_classes} onToggle={(v) => {
+                const next = toggleInArray(draft.hazard_classes, v);
+                // Dropping Life-Saving Rule also drops its sub-selection.
+                setDraft({ ...draft, hazard_classes: next, life_saving_rules: next.includes(LIFE_SAVING_RULE) ? (draft.life_saving_rules || []) : [] });
+              }} />
+              {draft.hazard_classes.includes(LIFE_SAVING_RULE) && (
+                <div className="mt-4 rounded-xl border border-teal-500/30 bg-[#0d1b26] p-3">
+                  <div className="text-xs font-semibold text-teal-400 mb-2">Which Life-Saving Rule?</div>
+                  <MultiSelectGrid options={LIFE_SAVING_RULE_TYPES} selected={draft.life_saving_rules || []} onToggle={(v) => setDraft({ ...draft, life_saving_rules: toggleInArray(draft.life_saving_rules || [], v) })} />
+                </div>
+              )}
             </div>
             <div>
               <SectionTitle>Tracking Type</SectionTitle>
@@ -517,6 +527,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
                 ["Description", draft.description],
                 ["Safety Concern", draft.safety_concern],
                 ["Hazard Classification", draft.hazard_classes.join(", ")],
+                ...((draft.life_saving_rules || []).length ? [["Life-Saving Rule Type", draft.life_saving_rules.join(", ")]] : []),
                 ["Risk Rating", draft.risk_rating],
                 ["Corrective Action", draft.corrective_action],
                 ["Preventative Action", draft.preventative_action],

@@ -25,6 +25,12 @@ const HAZARD_CLASS_OPTIONS = [
   "Life-Saving Rule", "Legislative", "Environmental", "Psychosocial", "Others",
 ];
 
+const LIFE_SAVING_RULE_OPTIONS = [
+  "Electrical Safety", "Stored Energy", "Work at Height", "Lifting",
+  "Rail and Road Vehicles", "Driving", "Confined Spaces", "Fire and Explosion",
+  "Plant and Machinery", "Remote and Lone Working", "Mental Health",
+];
+
 const SUBCONTRACTOR_OPTIONS = ["GIP", "Outspan", "Structform", "Sylvan", "Smith & Long", "Others"];
 
 const MIN_DESCRIPTION_LENGTH = 20;
@@ -52,6 +58,7 @@ export default function NewObservationDetailsPage({ initialDraft, onCancel, onBa
     trackingType: "",
     trackingTypeOther: "",
     hazardClass: "",
+    lifeSavingRule: "",
     ...initialDraft,
   });
   const [touched, setTouched] = useState({});
@@ -196,10 +203,20 @@ export default function NewObservationDetailsPage({ initialDraft, onCancel, onBa
           <Dropdown
             label="Hazard Class"
             value={draft.hazardClass}
-            onChange={(v) => setField("hazardClass", v)}
+            onChange={(v) => setDraft((d) => ({ ...d, hazardClass: v, lifeSavingRule: v === "Life-Saving Rule" ? d.lifeSavingRule : "" }))}
             options={HAZARD_CLASS_OPTIONS}
             placeholder="Optional…"
           />
+
+          {draft.hazardClass === "Life-Saving Rule" && (
+            <Dropdown
+              label="Life-Saving Rule Type"
+              value={draft.lifeSavingRule}
+              onChange={(v) => setField("lifeSavingRule", v)}
+              options={LIFE_SAVING_RULE_OPTIONS}
+              placeholder="Select the rule…"
+            />
+          )}
         </div>
 
         <WorkflowFooter

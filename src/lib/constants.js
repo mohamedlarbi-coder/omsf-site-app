@@ -43,6 +43,14 @@ export const HAZARD_CLASSES = [
   "Life-Saving Rule", "Legislative", "Environmental", "Psychosocial", "Others",
 ];
 
+// Second level under the "Life-Saving Rule" hazard class.
+export const LIFE_SAVING_RULE = "Life-Saving Rule";
+export const LIFE_SAVING_RULE_TYPES = [
+  "Electrical Safety", "Stored Energy", "Work at Height", "Lifting",
+  "Rail and Road Vehicles", "Driving", "Confined Spaces", "Fire and Explosion",
+  "Plant and Machinery", "Remote and Lone Working", "Mental Health",
+];
+
 export const TRACKING_TYPES = [
   "Fall hazard", "PPE", "Housekeeping", "Access Egress/Control Zone", "Moving Objects",
   "Drop Objects", "Mobile Equip", "Doc/Policy", "Tools", "Others",
@@ -95,6 +103,7 @@ export function emptyReportForm() {
     safety_concern: "",
     hazard_classes: [],
     hazard_class_other: "",
+    life_saving_rules: [],
     tracking_types: [],
     tracking_type_other: "",
     risk_rating: "",
@@ -245,6 +254,7 @@ export function buildReportEmail(report, profile, subcontractors = [], extraEmai
     report.safety_concern || "—",
     ``,
     `Hazard Classification: ${(report.hazard_classes || []).join(", ") || "—"}`,
+    ...((report.life_saving_rules || []).length ? [`Life-Saving Rule Type: ${report.life_saving_rules.join(", ")}`] : []),
     `Tracking Type: ${(report.tracking_types || []).join(", ") || "—"}`,
     `Risk Rating: ${report.risk_rating || "—"}`,
     `Contributing Factors: ${(report.contributing_factors || []).join(", ") || "—"}`,
