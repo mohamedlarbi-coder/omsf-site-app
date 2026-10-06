@@ -31,6 +31,31 @@ const LIFE_SAVING_RULE_OPTIONS = [
   "Plant and Machinery", "Remote and Lone Working", "Mental Health",
 ];
 
+function TileGrid({ options, value, onSelect }) {
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 8 }}>
+      {options.map((opt) => {
+        const active = value === opt;
+        return (
+          <button
+            key={opt}
+            type="button"
+            onClick={() => onSelect(opt)}
+            style={{
+              padding: "10px 12px", borderRadius: 10, textAlign: "left", cursor: "pointer", font: "inherit", fontSize: 13, fontWeight: 500,
+              background: active ? "#14C9CB" : "#0d1b26",
+              border: `1px solid ${active ? "#14C9CB" : "rgba(160,190,204,0.19)"}`,
+              color: active ? "#06222A" : "#D5D8DC",
+            }}
+          >
+            {opt}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 const SUBCONTRACTOR_OPTIONS = ["GIP", "Outspan", "Structform", "Sylvan", "Smith & Long", "Others"];
 
 const MIN_DESCRIPTION_LENGTH = 20;
@@ -179,6 +204,31 @@ export default function NewObservationDetailsPage({ initialDraft, onCancel, onBa
             )}
           </div>
 
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "#F1F5F6", marginBottom: 8 }}>
+              Hazard Classification <span style={{ color: "#73828B", fontWeight: 400 }}>(optional)</span>
+            </div>
+            <TileGrid
+              options={HAZARD_CLASS_OPTIONS}
+              value={draft.hazardClass}
+              onSelect={(v) => setDraft((d) => ({
+                ...d,
+                hazardClass: d.hazardClass === v ? "" : v,
+                lifeSavingRule: d.hazardClass === v || v !== "Life-Saving Rule" ? "" : d.lifeSavingRule,
+              }))}
+            />
+            {draft.hazardClass === "Life-Saving Rule" && (
+              <div style={{ marginTop: 12, padding: 14, borderRadius: 12, border: "1px solid rgba(24,201,203,0.35)", background: "#0d1b26", animation: "minervium-slide-in 0.28s ease-out" }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#18C9CB", marginBottom: 10 }}>Which Life-Saving Rule?</div>
+                <TileGrid
+                  options={LIFE_SAVING_RULE_OPTIONS}
+                  value={draft.lifeSavingRule}
+                  onSelect={(v) => setField("lifeSavingRule", draft.lifeSavingRule === v ? "" : v)}
+                />
+              </div>
+            )}
+          </div>
+
           <div onBlur={() => markTouched("trackingType")}>
             <Dropdown
               label="Tracking Type"
@@ -199,24 +249,6 @@ export default function NewObservationDetailsPage({ initialDraft, onCancel, onBa
               />
             )}
           </div>
-
-          <Dropdown
-            label="Hazard Class"
-            value={draft.hazardClass}
-            onChange={(v) => setDraft((d) => ({ ...d, hazardClass: v, lifeSavingRule: v === "Life-Saving Rule" ? d.lifeSavingRule : "" }))}
-            options={HAZARD_CLASS_OPTIONS}
-            placeholder="Optional…"
-          />
-
-          {draft.hazardClass === "Life-Saving Rule" && (
-            <Dropdown
-              label="Life-Saving Rule Type"
-              value={draft.lifeSavingRule}
-              onChange={(v) => setField("lifeSavingRule", v)}
-              options={LIFE_SAVING_RULE_OPTIONS}
-              placeholder="Select the rule…"
-            />
-          )}
         </div>
 
         <WorkflowFooter

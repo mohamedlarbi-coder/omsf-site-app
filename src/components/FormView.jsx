@@ -458,7 +458,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
                 setDraft({ ...draft, hazard_classes: next, life_saving_rules: next.includes(LIFE_SAVING_RULE) ? (draft.life_saving_rules || []) : [] });
               }} />
               {draft.hazard_classes.includes(LIFE_SAVING_RULE) && (
-                <div className="mt-4 rounded-xl border border-teal-500/30 bg-[#0d1b26] p-3">
+                <div className="mt-4 rounded-xl border border-teal-500/30 bg-[#0d1b26] p-3" style={{ animation: "minervium-slide-in 0.28s ease-out" }}>
                   <div className="text-xs font-semibold text-teal-400 mb-2">Which Life-Saving Rule?</div>
                   <MultiSelectGrid options={LIFE_SAVING_RULE_TYPES} selected={draft.life_saving_rules || []} onToggle={(v) => setDraft({ ...draft, life_saving_rules: toggleInArray(draft.life_saving_rules || [], v) })} />
                 </div>
