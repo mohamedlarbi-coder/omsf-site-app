@@ -119,12 +119,18 @@ function HexBackground() {
    placeholder (0, disabled) since that feature doesn't have real data behind
    it yet — see DashboardActionsPage.jsx comments for why it's derived-only on
    desktop and not built here. */
-export default function HomeView({ reports, setView, profile }) {
+export default function HomeView({ reports, setView, profile, handleLogout, setActiveReport }) {
   const [openActions, setOpenActions] = useState(0);
+  const [openList, setOpenList] = useState([]);
+  const [panel, setPanel] = useState(null); // "bell" | "me" | null
   useEffect(() => {
-    supabase.from("action_items").select("id", { count: "exact", head: true }).eq("status", "Open")
-      .then(({ count }) => setOpenActions(count || 0));
+    supabase.from("action_items").select("*").eq("status", "Open").order("due_date", { ascending: true, nullsFirst: false })
+      .then(({ data }) => { setOpenList(data || []); setOpenActions((data || []).length); });
   }, []);
+  const overdue = openList.filter((a) => a.due_date && new Date(a.due_date) < new Date());
+  const latest = [...(reports || [])].sort((a, b) => (b.created_at || b.report_date || "").localeCompare(a.created_at || a.report_date || "")).slice(0, 4);
+  const panelStyle = { position: "absolute", top: 58, right: 0, width: "min(88vw, 340px)", zIndex: 50, background: "#0A1B24", border: "1px solid rgba(20,220,229,0.3)", borderRadius: 16, padding: 14, boxShadow: "0 18px 40px rgba(0,0,0,0.5)", color: "#F5F7F7", textAlign: "left" };
+  const rowBtn = { display: "block", width: "100%", textAlign: "left", padding: "10px 8px", borderRadius: 10, background: "transparent", border: "none", color: "#F5F7F7", fontSize: 14 };
   const userName = (profile?.my_name || "").split(" ")[0] || "there";
   const initial = (profile?.my_name || "?").trim().charAt(0).toUpperCase();
 
@@ -189,9 +195,10 @@ export default function HomeView({ reports, setView, profile }) {
             <div style={{ color: "#F5F7F7", fontWeight: 800, fontSize: "clamp(16px, 4.2vw, 19px)" }}>{greeting()}</div>
             <div style={{ color: "#20F1EF", fontWeight: 800, fontSize: "clamp(18px, 4.8vw, 22px)" }}>{userName}</div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }}>
             <button
               aria-label="Notifications"
+              onClick={() => setPanel(panel === "bell" ? null : "bell")}
               style={{
                 position: "relative",
                 width: 44, height: 44, borderRadius: "50%",
@@ -201,10 +208,11 @@ export default function HomeView({ reports, setView, profile }) {
               }}
             >
               <Bell size={19} color="#F5F7F7" strokeWidth={1.9} />
-              <span style={{ position: "absolute", top: 9, right: 10, width: 7, height: 7, borderRadius: "50%", background: "#20F1EF", boxShadow: "0 0 6px rgba(32,241,239,0.85)" }} />
+              {(openActions > 0 || latest.length > 0) && <span style={{ position: "absolute", top: 9, right: 10, width: 7, height: 7, borderRadius: "50%", background: "#20F1EF", boxShadow: "0 0 6px rgba(32,241,239,0.85)" }} />}
             </button>
-            <div
-              aria-hidden="true"
+            <button
+              aria-label="Profile menu"
+              onClick={() => setPanel(panel === "me" ? null : "me")}
               style={{
                 width: 48, height: 48, borderRadius: "50%",
                 background: "rgba(3,17,22,0.85)",
@@ -215,7 +223,42 @@ export default function HomeView({ reports, setView, profile }) {
               }}
             >
               {initial}
-            </div>
+            </button>
+            {panel && (
+              <>
+                <div onClick={() => setPanel(null)} style={{ position: "fixed", inset: 0, zIndex: 40 }} />
+                <div style={panelStyle}>
+                  {panel === "me" ? (
+                    <>
+                      <div style={{ fontWeight: 700, fontSize: 16 }}>{profile?.my_name || "Your profile"}</div>
+                      <div style={{ color: "#9AA5AA", fontSize: 13, marginTop: 2 }}>{profile?.email}</div>
+                      <div style={{ color: "#13DCE5", fontSize: 12, fontWeight: 700, marginTop: 6, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                        {profile?.is_admin ? "Admin" : "Member"}{profile?.my_company ? ` · ${profile.my_company}` : ""}
+                      </div>
+                      <div style={{ height: 1, background: "rgba(255,255,255,0.08)", margin: "10px 0" }} />
+                      <button style={rowBtn} onClick={() => { setPanel(null); setView("settings"); }}>Settings &amp; profile</button>
+                      <button style={{ ...rowBtn, color: "#FF8A8A" }} onClick={() => { setPanel(null); handleLogout && handleLogout(); }}>Sign out</button>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ fontWeight: 700, marginBottom: 6 }}>Notifications</div>
+                      <button style={rowBtn} onClick={() => { setPanel(null); setView("actions"); }}>
+                        <b style={{ color: "#13DCE5" }}>{openActions}</b> open action{openActions === 1 ? "" : "s"}
+                        {overdue.length > 0 && <span style={{ color: "#FF8A8A" }}> · {overdue.length} overdue</span>}
+                      </button>
+                      <div style={{ color: "#9AA5AA", fontSize: 11, margin: "8px 8px 2px", letterSpacing: "0.06em", textTransform: "uppercase" }}>Latest reports</div>
+                      {latest.length === 0 && <div style={{ color: "#9AA5AA", fontSize: 13, padding: 8 }}>No reports yet.</div>}
+                      {latest.map((r) => (
+                        <button key={r.id} style={rowBtn} onClick={() => { setPanel(null); if (setActiveReport) { setActiveReport(r); setView("detail"); } else setView("log"); }}>
+                          <div style={{ fontSize: 14, fontWeight: 600 }}>{r.report_type} · {r.location || "—"}</div>
+                          <div style={{ color: "#9AA5AA", fontSize: 12 }}>{r.report_date}</div>
+                        </button>
+                      ))}
+                    </>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
