@@ -34,11 +34,12 @@ function buildPrompt(mode: string, c: Record<string, unknown>) {
     Array.isArray(c.life_saving_rules) && c.life_saving_rules.length && `Life-saving rule: ${c.life_saving_rules.map((x) => clip(x, 40)).join(", ")}`,
     Array.isArray(c.tracking_types) && c.tracking_types.length && `Hazard type: ${c.tracking_types.map((x) => clip(x, 40)).join(", ")}`,
     c.risk_rating && `Risk rating: ${clip(c.risk_rating, 40)}`,
+    c.brief && `The person's own quick summary of the issue: "${clip(c.brief, 200)}"`,
     c.safety_concern && `Safety concern noted: ${clip(c.safety_concern)}`,
   ].filter(Boolean).join("\n");
 
   if (mode === "draft") {
-    return `${facts}\n\nWrite a PRELIMINARY first draft for two form fields, using the attached photo (if there is one) and the details above. The person will review and edit it, so keep it modest and accurate.\n- "description": 2–3 SHORT sentences — just enough words to describe the issue: what is observed and where. For a Good Spot, what was done well.\n- "safety_concern": 2–3 SHORT sentences — the potential consequence / why it matters. For a Good Spot, why this practice is valuable.\nKeep both brief and plain — no padding, no repetition between the two boxes.\nDescribe only what you can actually see or were told; if the photo is unclear, stay general. Do not identify or describe people's faces. Reply with ONLY a JSON object: {"description": "...", "safety_concern": "..."}`;
+    return `${facts}\n\nWrite a PRELIMINARY first draft for two form fields, using the person's quick summary of the issue (and the attached photo, if there is one) plus the details above. The quick summary is the main source of truth. The person will review and edit it, so keep it modest and accurate.\n- "description": 2–3 SHORT sentences — just enough words to describe the issue: what is observed and where. For a Good Spot, what was done well.\n- "safety_concern": 2–3 SHORT sentences — the potential consequence / why it matters. For a Good Spot, why this practice is valuable.\nKeep both brief and plain — no padding, no repetition between the two boxes.\nDescribe only what you can actually see or were told; if the photo is unclear, stay general. Do not identify or describe people's faces. Reply with ONLY a JSON object: {"description": "...", "safety_concern": "..."}`;
   }
   if (mode === "description") {
     return `${facts}\n\nThe person's rough notes for the description:\n"""${clip(c.description)}"""\n\nRewrite these notes as a clear, factual observation description of 2–3 short sentences: what was observed, where, and why it is a concern (or, for a good spot, what was done well). Keep every fact; add none.`;
@@ -59,6 +60,9 @@ Deno.serve(async (req) => {
     const { mode, context, image } = await req.json();
     if (!["description", "corrective", "draft"].includes(mode) || typeof context !== "object" || !context) {
       return json({ error: "bad_request" }, 400);
+    }
+    if (mode === "draft" && clip(context.brief).trim().length < 3) {
+      return json({ error: "needs_notes" }, 400);
     }
     if (mode !== "draft" && clip(context.description).trim().length < 5) {
       return json({ error: mode === "description" ? "needs_notes" : "needs_description" }, 400);

@@ -269,6 +269,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
   // report details). status: idle | loading | ready | off | error. Nothing moves on
   // until the person confirms or edits it.
   const [aiDraft, setAiDraft] = useState({ status: "idle", confirmed: false, key: "" });
+  const [brief, setBrief] = useState(""); // the person's 3–5 word summary of the issue
   const [saving, setSaving] = useState(false);
 
   function toggleInArray(arr, val) {
@@ -293,9 +294,9 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
     const stale = () => aiRun.current !== myRun;
     setAiDraft({ status: "loading", confirmed: false, key });
     try {
-      const image = await downscaleForAi(draft.photo_data_url);
+      // Text only (the person's few words + the report details): much faster than sending a photo.
       const call = supabase.functions.invoke("ai-assist", {
-        body: { mode: "draft", context: aiContext(draft), image },
+        body: { mode: "draft", context: { ...aiContext(draft), brief: brief.trim() } },
       });
       // Never leave the spinner hanging: give up after 25 s and offer a retry.
       const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 25000));
@@ -318,15 +319,6 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
     aiRun.current += 1; // ignore whatever comes back
     setAiDraft((s) => ({ ...s, status: "idle", confirmed: true }));
   }
-
-  useEffect(() => {
-    if (step < 2 || step > 3) return;
-    const key = `${draft.report_type}|${draft.location}|${draft.photo_data_url ? draft.photo_data_url.length : 0}`;
-    if (aiDraft.key === key) return;
-    if (draft.description.trim() || draft.safety_concern.trim()) { setAiDraft((s) => ({ ...s, key })); return; }
-    runAiDraft(key);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
 
   // Editing either box counts as reviewing the draft.
   const editField = (field, v) => {
@@ -509,10 +501,30 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
         return (
           <div className="space-y-5">
             <SectionTitle icon={AlertTriangle}>Description</SectionTitle>
+            <div className="rounded-xl border border-teal-500/30 bg-[#0d1b26] p-3 space-y-2">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-teal-400">
+                <SparklesIcon size={13} /> What's the issue? A few words is enough
+              </div>
+              <div className="flex gap-2">
+                <input
+                  value={brief}
+                  onChange={(e) => setBrief(e.target.value.slice(0, 120))}
+                  onKeyDown={(e) => { if (e.key === "Enter" && brief.trim().length >= 3 && aiDraft.status !== "loading") runAiDraft(aiDraft.key, { force: true }); }}
+                  placeholder="e.g. cables across walkway"
+                  enterKeyHint="go"
+                  className="flex-1 min-w-0 px-3 py-2.5 rounded-lg bg-[#08131D] border border-slate-700 text-slate-100 text-sm placeholder-slate-500 focus:outline-none focus:border-teal-400"
+                />
+                <button type="button" disabled={brief.trim().length < 3 || aiDraft.status === "loading"}
+                  onClick={() => runAiDraft(aiDraft.key, { force: true })}
+                  className="px-3 py-2.5 rounded-lg bg-teal-500 text-slate-900 text-sm font-bold flex items-center gap-1.5 disabled:opacity-40">
+                  <SparklesIcon size={14} /> Write it
+                </button>
+              </div>
+            </div>
             {aiDraft.status === "loading" && (
               <div className="rounded-xl border border-teal-500/30 bg-[#0d1b26] p-3 text-sm text-teal-300 flex items-center gap-2">
                 <Loader2 size={15} className="animate-spin shrink-0" />
-                <span className="flex-1">Preparing a first draft from your photo and report type…</span>
+                <span className="flex-1">Writing it up…</span>
                 <button type="button" onClick={skipAiDraft} className="underline text-slate-300 shrink-0">Skip</button>
               </div>
             )}
@@ -547,11 +559,10 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
               </div>
             )}
             <TextArea label="Description" required rows={5} value={draft.description} onChange={(v) => editField("description", v)} />
-            <AiAssistButton mode="description" canRun
-              label={draft.description.trim().length >= 5 ? "Improve my text" : "Write it for me"}
-              isEmpty={draft.description.trim().length < 5}
-              onEmpty={() => runAiDraft(aiDraft.key || `${draft.report_type}|${draft.location}`, { force: true })}
-              context={aiContext(draft)} onUse={(t) => setDraft({ ...draft, description: t, ai_generated: true })} />
+            {draft.description.trim().length >= 5 && (
+              <AiAssistButton mode="description" canRun label="Improve my text"
+                context={aiContext(draft)} onUse={(t) => setDraft({ ...draft, description: t, ai_generated: true })} />
+            )}
             <SelectField
               label="Subcontractor"
               value={draft.subcontractor}
