@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { supabase } from "../../supabaseClient";
 import { Eye, ShieldCheck, Users, TrendingUp } from "lucide-react";
 
-function KPICard({ icon: Icon, label, value, delta }) {
+function KPICard({ icon: Icon, label, value, delta, onClick }) {
   return (
     <div
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
       style={{
+        cursor: onClick ? "pointer" : "default",
         flex: 1,
         background: "linear-gradient(145deg, rgba(14,31,42,0.98), rgba(10,25,35,0.98))",
         border: "1px solid rgba(121, 160, 177, 0.18)",
@@ -38,14 +42,22 @@ function KPICard({ icon: Icon, label, value, delta }) {
   );
 }
 
-/* Total Observations comes from real report data. Closed Actions,
-   Participants and Safety Improvement are placeholder figures —
-   Actions and Users/participation tracking aren't real features yet. */
-export default function DashboardKPICards({ totalObservations }) {
+/* Total Observations and Actions come from real data. Participants and
+   Safety Improvement are still placeholder figures. */
+export default function DashboardKPICards({ totalObservations, onOpenActions }) {
+  const [actions, setActions] = useState([]);
+  useEffect(() => {
+    supabase.from("action_items").select("id,status,due_date").then(({ data }) => setActions(data || []));
+  }, []);
+  const open = actions.filter((a) => a.status === "Open");
+  const overdue = open.filter((a) => a.due_date && new Date(a.due_date) < new Date()).length;
+  const closed = actions.length - open.length;
+
   return (
     <div style={{ display: "flex", gap: 14, marginBottom: 16 }}>
-      <KPICard icon={Eye} label="Total Observations" value={totalObservations} delta="+18 this week" />
-      <KPICard icon={ShieldCheck} label="Closed Actions" value="96" delta="+24 this week" />
+      <KPICard icon={Eye} label="Total Observations" value={totalObservations} />
+      <KPICard icon={ShieldCheck} label="Open Actions" value={open.length}
+        delta={`${closed} closed${overdue ? ` · ${overdue} overdue` : ""} — view ›`} onClick={onOpenActions} />
       <KPICard icon={Users} label="Participants" value="254" delta="+32 this week" />
       <KPICard icon={TrendingUp} label="Safety Improvement" value="78%" delta="+12% vs last month" />
     </div>

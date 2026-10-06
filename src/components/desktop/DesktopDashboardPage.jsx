@@ -5,6 +5,7 @@ import DashboardKPICards from "./DashboardKPICards";
 import DashboardDonutChart from "./DashboardDonutChart";
 import DashboardRecentObservations from "./DashboardRecentObservations";
 import DashboardProjectMap from "./DashboardProjectMap";
+import DashboardTradeCharts from "./DashboardTradeCharts";
 
 /* MINERVIUM — Desktop Dashboard, the landing screen when the app is
    opened from a computer (wide screen). Mirrors the mobile Home
@@ -13,7 +14,7 @@ import DashboardProjectMap from "./DashboardProjectMap";
    exists; a few KPIs (Closed Actions, Participants, Safety
    Improvement) are placeholders since those features aren't built
    yet — see DashboardKPICards for the exact breakdown. */
-export default function DesktopDashboardPage({ profile, reports, siteMapUrl, setView, showToast }) {
+export default function DesktopDashboardPage({ profile, reports, subcontractors = [], siteMapUrl, setView, showToast }) {
   function comingSoon(feature) {
     showToast(`${feature} isn't built yet — coming soon`);
   }
@@ -87,12 +88,14 @@ export default function DesktopDashboardPage({ profile, reports, siteMapUrl, set
           </div>
         </div>
 
-        <DashboardKPICards totalObservations={reports.length} />
+        <DashboardKPICards totalObservations={reports.length} onOpenActions={() => setView("actions-desktop")} />
 
         <div style={{ display: "flex", gap: 14, marginBottom: 14 }}>
           <DashboardDonutChart reports={reports} />
           <DashboardRecentObservations reports={reports} onViewAll={() => setView("log")} />
         </div>
+
+        <DashboardTradeCharts reports={reports} subcontractors={subcontractors} onOpenActions={(trade) => { try { sessionStorage.setItem("actionsTrade", trade || ""); } catch { /* ignore */ } setView("actions-desktop"); }} />
 
         <DashboardProjectMap reports={reports} siteMapUrl={siteMapUrl} onViewFullMap={() => setView("project-map-desktop")} />
       </div>

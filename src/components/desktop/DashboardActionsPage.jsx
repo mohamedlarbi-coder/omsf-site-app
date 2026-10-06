@@ -3,6 +3,8 @@ import { X, Camera } from "lucide-react";
 import DashboardSidebar from "./DashboardSidebar";
 import { supabase } from "../../supabaseClient";
 import { compressImage } from "../../lib/constants";
+import TradePie from "./TradePie";
+import { countByTrade, tradeOfAction } from "../../lib/trades";
 
 function ageLabel(dateStr) {
   const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
@@ -24,10 +26,14 @@ function dueLabel(item) {
    whenever a report includes a Corrective/Preventative Action.
    Closing an item requires a photo, matching the real workflow: the
    assigned sub reviews the report, takes action, and submits proof. */
-export default function DashboardActionsPage({ profile, setView, showToast }) {
+export default function DashboardActionsPage({ profile, subcontractors = [], setView, showToast }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("Open");
+  // Trade picked on the home dashboard pie (or here); null = all trades.
+  const [trade, setTrade] = useState(() => {
+    try { const t = sessionStorage.getItem("actionsTrade"); sessionStorage.removeItem("actionsTrade"); return t || null; } catch { return null; }
+  });
   const [closingItem, setClosingItem] = useState(null);
   const [closurePhoto, setClosurePhoto] = useState(null);
   const [closureNotes, setClosureNotes] = useState("");
@@ -43,11 +49,13 @@ export default function DashboardActionsPage({ profile, setView, showToast }) {
 
   useEffect(() => { loadItems(); }, []);
 
-  const filtered = items.filter((i) => {
+  const byStatus = items.filter((i) => {
     if (filter === "All") return true;
     if (filter === "Overdue") return i.status === "Open" && i.due_date && new Date(i.due_date) < new Date();
     return i.status === filter;
   });
+  const tradeData = countByTrade(subcontractors.map((s) => s.name), byStatus, tradeOfAction);
+  const filtered = trade ? byStatus.filter((i) => tradeOfAction(i) === trade) : byStatus;
 
   async function handlePhotoSelect(e) {
     const file = e.target.files?.[0];
@@ -100,6 +108,26 @@ export default function DashboardActionsPage({ profile, setView, showToast }) {
             {items.filter((i) => i.status === "Open").length} open · {items.filter((i) => i.status === "Closed").length} closed
           </div>
         </div>
+
+        <div style={{ display: "flex", gap: 14, marginBottom: 18, flexWrap: "wrap" }}>
+          <TradePie
+            title="Actions by Trade"
+            subtitle={`${filter} actions — click a trade to filter the list`}
+            data={tradeData}
+            centerLabel={filter}
+            selected={trade}
+            onSelect={setTrade}
+          />
+        </div>
+
+        {trade && (
+          <div style={{ marginBottom: 12, fontSize: 12.5, color: "#18C9CB" }}>
+            Showing actions for <b>{trade}</b>{" "}
+            <button onClick={() => setTrade(null)} style={{ background: "none", border: "none", color: "#8997A1", textDecoration: "underline", cursor: "pointer", font: "inherit" }}>
+              show all trades
+            </button>
+          </div>
+        )}
 
         <div style={{ display: "flex", gap: 8, marginBottom: 18 }}>
           {["Open", "Overdue", "Closed", "All"].map((f) => (
