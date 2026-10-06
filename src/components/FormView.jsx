@@ -303,7 +303,11 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
       const { data, error } = await Promise.race([call, timeout]);
       if (stale()) return;
       if (error || data?.error || !data?.description) {
-        setAiDraft({ status: data?.error === "not_configured" ? "off" : "error", confirmed: false, key });
+        // A non-2xx reply comes back as `error` with the JSON body on error.context.
+        let code = data?.error;
+        if (!code && error?.context?.json) { try { code = (await error.context.json())?.error; } catch { /* ignore */ } }
+        if (stale()) return;
+        setAiDraft({ status: code === "not_configured" ? "off" : "error", confirmed: false, key });
         return;
       }
       setDraft((d) => (!force && (d.description.trim() || d.safety_concern.trim())
@@ -550,6 +554,11 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
                       className="px-3 py-2 rounded-lg border border-slate-600 text-slate-400 text-sm">Clear &amp; write myself</button>
                   </div>
                 )}
+              </div>
+            )}
+            {aiDraft.status === "off" && (
+              <div className="rounded-xl border border-amber-500/30 bg-[#0d1b26] p-3 text-xs text-amber-300">
+                AI help isn't switched on yet — ask the admin. You can still write the description yourself.
               </div>
             )}
             {aiDraft.status === "error" && (
