@@ -92,6 +92,10 @@ const DOMAIN_SOURCE = {
   [DOMAINS.FACTOR]: { field: "contributing_factors", multi: true, map: FACTOR_CODE_BY_LABEL },
 };
 
+/* Last month (0-based) the GSH charts include. Set to August (7) because no
+   real September/October data exists yet — raise it as real months arrive. */
+export const DATA_THROUGH_MONTH = 7;
+
 export const MONTH_LABELS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
@@ -168,6 +172,7 @@ export function buildYearMatrix({
     if (site !== "RSSOM" && r.site_code !== site) continue;
 
     const mi = Number(String(r.period).slice(5, 7)) - 1;
+    if (mi > DATA_THROUGH_MONTH) continue;
     if (!isRollupMonth[mi]) continue; // month has gone live; ignore stale rollup
 
     const target = byCode.get(r.code);
@@ -188,6 +193,7 @@ export function buildYearMatrix({
     if (!d || d.getFullYear() !== yearOf(rollupRows, reports)) continue;
 
     const mi = d.getMonth();
+    if (mi > DATA_THROUGH_MONTH) continue;
     if (isRollupMonth[mi]) continue; // historical month owns this period
 
     const raw = rep[field];

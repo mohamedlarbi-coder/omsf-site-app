@@ -44,6 +44,8 @@ export default function GshMetricBlock({
   narrow = false,
 }) {
   const { rows, totals, grandTotal } = matrix;
+  // Only show months up to the last one with data (no empty Sep/Oct columns).
+  const shown = currentMonth >= 0 ? currentMonth + 1 : 12;
 
   const peaks = rows.map((r) => {
     const max = Math.max(...r.values);
@@ -82,11 +84,11 @@ export default function GshMetricBlock({
       </h3>
 
       <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, minWidth: 840 }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, minWidth: 150 + shown * 56 + 60 }}>
           <thead>
             <tr>
               <th style={{ ...head, textAlign: "left", minWidth: 150 }}>{title}</th>
-              {MONTH_LABELS.map((m) => (
+              {MONTH_LABELS.slice(0, shown).map((m) => (
                 <th key={m} style={head}>{m}</th>
               ))}
               <th style={{ ...head, color: "#25E0DE" }}>Total</th>
@@ -98,7 +100,7 @@ export default function GshMetricBlock({
                 <td style={{ ...cell, textAlign: "left", color: "#D5D8DC" }}>
                   {r.label}
                 </td>
-                {r.values.map((v, mi) => (
+                {r.values.slice(0, shown).map((v, mi) => (
                   <td key={mi} style={cellStyle(v, mi, peaks[ri])}>{v}</td>
                 ))}
                 <td style={{ ...cell, color: "#25E0DE", fontWeight: 700 }}>{r.total}</td>
@@ -120,7 +122,7 @@ export default function GshMetricBlock({
               >
                 Total
               </td>
-              {totals.map((v, mi) => (
+              {totals.slice(0, shown).map((v, mi) => (
                 <td
                   key={mi}
                   style={{
