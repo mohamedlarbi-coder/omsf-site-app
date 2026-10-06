@@ -109,6 +109,7 @@ export function emptyReportForm() {
     reviewed_by: "",
     eco_online_num: "",
     map_pin: null,
+    building_pin: null,
     gps: null,
     site_map_snapshot: null,
     ai_generated: false,
@@ -263,3 +264,19 @@ export function buildReportEmail(report, profile, subcontractors = [], extraEmai
   const body = lines.join("\n");
   return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
+
+/* Detailed building plans that can be pinned in addition to the site map.
+   Keyed by the building name as it appears in BUILDING_OPTIONS_BY_SITE. */
+export const BUILDING_PLANS = {
+  "OMSF Building": {
+    url: "/plans/omsf-maintenance-plan.jpg",
+    label: "OMSF Maintenance Building",
+  },
+};
+// Areas 1–5 (Control Rooms … Train Wash) are zones of the maintenance building,
+// so choosing one of them shows the same plan.
+export const planForLocation = (loc) => {
+  const l = (loc || "").trim();
+  if (/^Area [1-5]\b/.test(l)) return BUILDING_PLANS["OMSF Building"];
+  return BUILDING_PLANS[l] || null;
+};

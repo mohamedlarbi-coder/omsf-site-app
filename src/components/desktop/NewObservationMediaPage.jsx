@@ -3,6 +3,8 @@ import { X } from "lucide-react";
 import ObservationStepper from "./ObservationStepper";
 import PhotoThumbnailGrid from "./PhotoThumbnailGrid";
 import ObservationMapPicker from "./ObservationMapPicker";
+import BuildingPlanPicker from "../BuildingPlanPicker";
+import { planForLocation } from "../../lib/constants";
 import WorkflowFooter from "./WorkflowFooter";
 
 /* MINERVIUM — New Observation, Step 3: Media.
@@ -84,6 +86,10 @@ export default function NewObservationMediaPage({ initialDraft, onCancel, onBack
               siteMapUrl={siteMapUrl}
             />
           </div>
+
+          {planForLocation(draft.location) && (
+            <BuildingPlanPicker plan={planForLocation(draft.location)} pin={draft.buildingPin} onPinChange={(pin) => setField("buildingPin", pin)} />
+          )}
         </div>
 
         <WorkflowFooter

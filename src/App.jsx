@@ -25,7 +25,7 @@ import SendPromptView from "./components/SendPromptView";
 import ContactsView from "./components/ContactsView";
 import OnboardingView from "./components/OnboardingView";
 import { Loader2 } from "lucide-react";
-import { isDemoReport } from "./lib/constants";
+import { isDemoReport, planForLocation } from "./lib/constants";
 
 export default function App() {
   const [session, setSession] = useState(undefined); // undefined = loading, null = logged out
@@ -362,6 +362,7 @@ export default function App() {
               corrective_action: "",
               preventative_action: "",
               map_pin: draft.mapPin || null,
+              building_pin: planForLocation(draft.location) ? draft.buildingPin || null : null,
               site_map_snapshot: draft.mapPin ? siteMapUrl : null,
               ai_generated: false,
             };

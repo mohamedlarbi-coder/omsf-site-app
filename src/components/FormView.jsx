@@ -9,6 +9,8 @@ import {
   emptyReportForm, compressImage, getGpsPosition, riskBarInfo, resolveCompanyName,
 } from "../lib/constants";
 import BackgroundWatermark from "./BackgroundWatermark";
+import BuildingPlanPicker from "./BuildingPlanPicker";
+import { planForLocation } from "../lib/constants";
 
 const STEPS = ["Photo", "Type & Location", "Site Map", "Description", "Classification", "Corrective Action", "Review"];
 
@@ -274,7 +276,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
     // downstream Word/email exports don't need new columns — they just
     // see the resolved company name like they always have.
     const { company_subcontractor, company_subcontractor_other, company_visitor_name, ...rest } = draft;
-    const payload = { ...rest, company: resolveCompanyName(draft), site_map_snapshot: draft.map_pin ? siteMapUrl : null };
+    const payload = { ...rest, company: resolveCompanyName(draft), site_map_snapshot: draft.map_pin ? siteMapUrl : null, building_pin: planForLocation(draft.location) ? draft.building_pin || null : null };
     const saved = await saveReport(payload);
     setSaving(false);
     if (saved) {
@@ -419,6 +421,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
               </button>
             )}
             <SiteMapPicker siteMapUrl={siteMapUrl} pin={draft.map_pin} onPinChange={(pin) => setDraft({ ...draft, map_pin: pin })} gpsStatus={gpsStatus} />
+            <BuildingPlanPicker plan={planForLocation(draft.location)} pin={draft.building_pin} onPinChange={(pin) => setDraft({ ...draft, building_pin: pin })} />
           </div>
         );
       case 3:
