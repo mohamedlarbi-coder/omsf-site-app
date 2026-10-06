@@ -131,6 +131,7 @@ export default function LogView({ profile, profiles, reports, setView, setActive
         onNavigate={(key) => {
           if (key === "observations") return;
           if (key === "home") setView("home");
+          else if (key === "actions") setView("actions");
           else if (key === "more") setView("settings");
         }}
         onNewObservation={() => setView("form")}

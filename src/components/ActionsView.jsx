@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { ChevronLeft, Loader2 } from "lucide-react";
+import BottomTabBar from "./BottomTabBar";
 import MinerviumLogo from "./MinerviumLogo";
 import BackgroundWatermark from "./BackgroundWatermark";
 import TradePie from "./desktop/TradePie";
@@ -98,6 +99,15 @@ export default function ActionsView({ reports = [], subcontractors = [], setView
           })}
         </div>
       </div>
+      <BottomTabBar
+        active="actions"
+        onNavigate={(key) => {
+          if (key === "home") setView("home");
+          else if (key === "observations") setView("log");
+          else if (key === "more") setView("settings");
+        }}
+        onNewObservation={() => setView("form")}
+      />
     </div>
   );
 }

@@ -324,6 +324,7 @@ export default function HomeView({ reports, setView, profile }) {
         onNavigate={(key) => {
           if (key === "home") return;
           if (key === "observations") setView("log");
+          else if (key === "actions") setView("actions");
           else if (key === "more") setView("settings");
         }}
         onNewObservation={() => setView("form")}
