@@ -281,7 +281,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
     setSaving(false);
     if (saved) {
       showToast("Report saved");
-      if (profile.distribution_list && profile.distribution_list.trim()) {
+      if ((profile.distribution_list && profile.distribution_list.trim()) || profile.email) {
         setPendingSendReport(saved);
         setView("send");
       } else {

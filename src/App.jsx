@@ -100,7 +100,7 @@ export default function App() {
     if (!error) {
       // Admin status is decided by the database (public.is_admin); the UI only mirrors it.
       const { data: adminFlag } = await supabase.rpc("is_admin");
-      const full = { ...data, is_admin: adminFlag === true };
+      const full = { ...data, is_admin: adminFlag === true, email: session.user.email || "" };
       setProfile(full);
       return full;
     }

@@ -28,11 +28,13 @@ export default function SendPromptView({ profile, pendingSendReport, setPendingS
     const baseEmails = (profile.distribution_list || "").split(/[,;\n]/).map((s) => s.trim()).filter(Boolean);
     const subEmails = matchedSubs.flatMap((s) => s.contact_emails || []);
     const extra = extraEmail.trim() ? [extraEmail.trim()] : [];
-    return [...new Set([...baseEmails, ...subEmails, ...extra])];
+    // The submitter always gets a copy at the email they registered with.
+    const self = profile.email ? [profile.email.trim()] : [];
+    return [...new Set([...baseEmails, ...subEmails, ...extra, ...self])];
   }
 
   function getLink() {
-    return buildReportEmail(pendingSendReport, profile, subcontractors, extraEmail.trim() ? [extraEmail.trim()] : []);
+    return buildReportEmail(pendingSendReport, profile, subcontractors, [extraEmail.trim(), profile.email].filter(Boolean));
   }
 
   // Sends the email automatically in the background via the
@@ -110,6 +112,12 @@ export default function SendPromptView({ profile, pendingSendReport, setPendingS
             <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Base Distribution List</div>
             <div className="text-sm text-slate-200 break-words">{profile.distribution_list || "—"}</div>
           </div>
+          {profile.email && (
+            <div>
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Your copy</div>
+              <div className="text-sm text-slate-200 break-words">{profile.email}</div>
+            </div>
+          )}
           {matchedSubs.map((sub) => (
             <div key={sub.name}>
               <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
