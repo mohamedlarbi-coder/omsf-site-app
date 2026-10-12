@@ -22,6 +22,9 @@ Rules:
 - Plain, factual, professional language. No blame, no speculation about who is at fault.
 - Output ONLY what is asked for (the text for the form field, or the JSON object when requested): no preface, no quotes, no markdown headings.`;
 
+// Fair-use cap per user per month (drafts). Raise here if needed.
+const MONTHLY_DRAFT_LIMIT = 60;
+
 const clip = (v: unknown, n = 1500) => String(v ?? "").slice(0, n);
 
 function buildPrompt(mode: string, c: Record<string, unknown>) {
@@ -39,7 +42,7 @@ function buildPrompt(mode: string, c: Record<string, unknown>) {
   ].filter(Boolean).join("\n");
 
   if (mode === "draft") {
-    return `${facts}\n\nWrite a PRELIMINARY first draft for two form fields, using the person's quick summary of the issue (and the attached photo, if there is one) plus the details above. The quick summary is the main source of truth. The person will review and edit it, so keep it modest and accurate.\n- "description": 2–3 SHORT sentences — just enough words to describe the issue: what is observed and where. For a Good Spot, what was done well.\n- "safety_concern": 2–3 SHORT sentences — the potential consequence / why it matters. For a Good Spot, why this practice is valuable.\nKeep both brief and plain — no padding, no repetition between the two boxes.\nDescribe only what you can actually see or were told; if the photo is unclear, stay general. Do not identify or describe people's faces. Reply with ONLY a JSON object: {"description": "...", "safety_concern": "..."}`;
+    return `${facts}\n\nWrite the final wording for two report fields from the person's quick summary of the issue (the main source of truth) and the attached photo, if there is one, plus the details above.\n- "description": 2–3 sentences, technical and precise, to the point: what is observed, where, and by whom/what (by trade or activity, never by name). For a Good Spot, what was done well.\n- "safety_concern": 1–2 sentences: the hazard and its potential consequence, in professional H&S language. For a Good Spot, why the practice is valuable.\nNo padding, no repetition between the two fields, no blame. Describe only what you can see or were told; if the photo is unclear, rely on the summary. Do not identify or describe people's faces. Reply with ONLY a JSON object: {"description": "...", "safety_concern": "..."}`;
   }
   if (mode === "description") {
     return `${facts}\n\nThe person's rough notes for the description:\n"""${clip(c.description)}"""\n\nRewrite these notes as a clear, factual observation description of 2–3 short sentences: what was observed, where, and why it is a concern (or, for a good spot, what was done well). Keep every fact; add none.`;
@@ -66,6 +69,23 @@ Deno.serve(async (req) => {
     }
     if (mode !== "draft" && clip(context.description).trim().length < 5) {
       return json({ error: mode === "description" ? "needs_notes" : "needs_description" }, 400);
+    }
+
+    // Monthly fair-use limit per user (drafts only) — keeps the bill predictable.
+    if (mode === "draft") {
+      try {
+        const auth = req.headers.get("authorization") || "";
+        const payload = JSON.parse(atob(auth.replace(/^Bearer\s+/i, "").split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+        const url = Deno.env.get("SUPABASE_URL"), sk = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+        if (payload?.sub && url && sk) {
+          const r = await fetch(`${url}/rest/v1/rpc/ai_usage_hit`, {
+            method: "POST",
+            headers: { apikey: sk, Authorization: `Bearer ${sk}`, "content-type": "application/json" },
+            body: JSON.stringify({ p_user: payload.sub, p_limit: MONTHLY_DRAFT_LIMIT }),
+          });
+          if (r.ok && (await r.json()) === false) return json({ error: "limit_reached" }, 429);
+        }
+      } catch (e) { console.error("usage check failed", e); }
     }
 
     // Optional photo (data URL) — only used by the first-draft mode.

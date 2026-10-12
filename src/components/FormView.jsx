@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 import { supabase } from "../supabaseClient";
-import { Sparkles as SparklesIcon } from "lucide-react";
 import {
   X, Check, ChevronLeft, ChevronRight, Camera, Image as ImageIcon,
   AlertTriangle, MapPin, Loader2, ClipboardList,
@@ -12,7 +11,6 @@ import {
 } from "../lib/constants";
 import BackgroundWatermark from "./BackgroundWatermark";
 import BuildingPlanPicker from "./BuildingPlanPicker";
-import AiAssistButton from "./AiAssistButton";
 import { planForLocation } from "../lib/constants";
 
 const STEPS = ["Photo", "Type & Location", "Site Map", "Description", "Classification", "Corrective Action", "Review"];
@@ -294,9 +292,10 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
     const stale = () => aiRun.current !== myRun;
     setAiDraft({ status: "loading", confirmed: false, key });
     try {
-      // Text only (the person's few words + the report details): much faster than sending a photo.
+      // The photo is shrunk first so the upload is small and quick.
+      const image = await downscaleForAi(draft.photo_data_url, 640);
       const call = supabase.functions.invoke("ai-assist", {
-        body: { mode: "draft", context: { ...aiContext(draft), brief: brief.trim() } },
+        body: { mode: "draft", context: { ...aiContext(draft), brief: brief.trim() }, image },
       });
       // Never leave the spinner hanging: give up after 25 s and offer a retry.
       const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 25000));
@@ -307,7 +306,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
         let code = data?.error;
         if (!code && error?.context?.json) { try { code = (await error.context.json())?.error; } catch { /* ignore */ } }
         if (stale()) return;
-        setAiDraft({ status: code === "not_configured" ? "off" : "error", confirmed: false, key });
+        setAiDraft({ status: code === "not_configured" ? "off" : code === "limit_reached" ? "limit" : "error", confirmed: false, key });
         return;
       }
       setDraft((d) => (!force && (d.description.trim() || d.safety_concern.trim())
@@ -317,6 +316,17 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
     } catch {
       if (!stale()) setAiDraft({ status: "error", confirmed: false, key });
     }
+  }
+
+  // Runs once, quietly, when the person leaves Classification: the write-up is
+  // ready by the time they reach the review step. Re-runs only if the words changed.
+  const draftedFor = useRef("");
+  function maybeDraft() {
+    const b = brief.trim();
+    if (b.length < 3 || draftedFor.current === b) return;
+    if (draftedFor.current === "" && draft.description.trim()) return; // they wrote their own
+    draftedFor.current = b;
+    runAiDraft(b, { force: true });
   }
 
   function skipAiDraft() {
@@ -341,7 +351,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
       if (draft.company === "Visitor" && !draft.company_visitor_name.trim()) return false;
       return true;
     }
-    if (step === 3) return draft.description.trim().length > 0 && !(aiDraft.status === "ready" && !aiDraft.confirmed) && aiDraft.status !== "loading";
+    if (step === 3) return brief.trim().length >= 3 || draft.description.trim().length > 0;
     return true;
   };
 
@@ -506,72 +516,17 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
           <div className="space-y-5">
             <SectionTitle icon={AlertTriangle}>Description</SectionTitle>
             <div className="rounded-xl border border-teal-500/30 bg-[#0d1b26] p-3 space-y-2">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-teal-400">
-                <SparklesIcon size={13} /> What's the issue? A few words is enough
-              </div>
-              <div className="flex gap-2">
-                <input
-                  value={brief}
-                  onChange={(e) => setBrief(e.target.value.slice(0, 120))}
-                  onKeyDown={(e) => { if (e.key === "Enter" && brief.trim().length >= 3 && aiDraft.status !== "loading") runAiDraft(aiDraft.key, { force: true }); }}
-                  placeholder="e.g. cables across walkway"
-                  enterKeyHint="go"
-                  className="flex-1 min-w-0 px-3 py-2.5 rounded-lg bg-[#08131D] border border-slate-700 text-slate-100 text-sm placeholder-slate-500 focus:outline-none focus:border-teal-400"
-                />
-                <button type="button" disabled={brief.trim().length < 3 || aiDraft.status === "loading"}
-                  onClick={() => runAiDraft(aiDraft.key, { force: true })}
-                  className="px-3 py-2.5 rounded-lg bg-teal-500 text-slate-900 text-sm font-bold flex items-center gap-1.5 disabled:opacity-40">
-                  <SparklesIcon size={14} /> Write it
-                </button>
+              <div className="text-xs font-bold uppercase tracking-wide text-teal-400">What did you see? A few words is enough</div>
+              <input
+                value={brief}
+                onChange={(e) => setBrief(e.target.value.slice(0, 120))}
+                placeholder="e.g. worker at height, no harness"
+                className="w-full px-3 py-2.5 rounded-lg bg-[#08131D] border border-slate-700 text-slate-100 text-sm placeholder-slate-500 focus:outline-none focus:border-teal-400"
+              />
+              <div className="text-xs text-slate-400">
+                Using your photo and these words, the description and safety concern are written for you. You'll review everything before the report is sent.
               </div>
             </div>
-            {aiDraft.status === "loading" && (
-              <div className="rounded-xl border border-teal-500/30 bg-[#0d1b26] p-3 text-sm text-teal-300 flex items-center gap-2">
-                <Loader2 size={15} className="animate-spin shrink-0" />
-                <span className="flex-1">Writing it up…</span>
-                <button type="button" onClick={skipAiDraft} className="underline text-slate-300 shrink-0">Skip</button>
-              </div>
-            )}
-            {aiDraft.status === "ready" && (
-              <div className="rounded-xl border border-teal-500/40 bg-[#0d1b26] p-3 space-y-2" style={{ animation: "minervium-slide-in 0.28s ease-out" }}>
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-teal-400">
-                  <SparklesIcon size={13} /> AI first draft
-                </div>
-                <div className="text-sm text-slate-200">
-                  {aiDraft.confirmed
-                    ? "Draft confirmed — you can keep editing the boxes below."
-                    : "I filled in Description and Safety Concern from your photo and report type. Read them, change anything that's wrong, then confirm to continue."}
-                </div>
-                {!aiDraft.confirmed && (
-                  <div className="flex flex-wrap gap-2">
-                    <button type="button" onClick={() => setAiDraft((s) => ({ ...s, confirmed: true }))}
-                      className="px-3 py-2 rounded-lg bg-teal-500 text-slate-900 text-sm font-bold flex items-center gap-1.5">
-                      <Check size={14} /> Looks good — confirm
-                    </button>
-                    <button type="button" onClick={() => runAiDraft(aiDraft.key, { force: true })}
-                      className="px-3 py-2 rounded-lg border border-slate-600 text-slate-200 text-sm">Regenerate</button>
-                    <button type="button" onClick={() => { setDraft({ ...draft, description: "", safety_concern: "" }); setAiDraft((s) => ({ ...s, status: "idle", confirmed: true })); }}
-                      className="px-3 py-2 rounded-lg border border-slate-600 text-slate-400 text-sm">Clear &amp; write myself</button>
-                  </div>
-                )}
-              </div>
-            )}
-            {aiDraft.status === "off" && (
-              <div className="rounded-xl border border-amber-500/30 bg-[#0d1b26] p-3 text-xs text-amber-300">
-                AI help isn't switched on yet — ask the admin. You can still write the description yourself.
-              </div>
-            )}
-            {aiDraft.status === "error" && (
-              <div className="rounded-xl border border-amber-500/30 bg-[#0d1b26] p-3 text-xs text-amber-300 flex items-center justify-between gap-2">
-                <span>Couldn't prepare a draft — write it yourself, or try again.</span>
-                <button type="button" onClick={() => runAiDraft(aiDraft.key)} className="underline">Retry</button>
-              </div>
-            )}
-            <TextArea label="Description" required rows={5} value={draft.description} onChange={(v) => editField("description", v)} />
-            {draft.description.trim().length >= 5 && (
-              <AiAssistButton mode="description" canRun label="Improve my text"
-                context={aiContext(draft)} onUse={(t) => setDraft({ ...draft, description: t, ai_generated: true })} />
-            )}
             <SelectField
               label="Subcontractor"
               value={draft.subcontractor}
@@ -587,7 +542,6 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
                 placeholder="Enter subcontractor name"
               />
             )}
-            <TextArea label="Safety Concern" rows={5} value={draft.safety_concern} onChange={(v) => editField("safety_concern", v)} />
           </div>
         );
       case 4:
@@ -637,8 +591,6 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
               <SectionTitle>Corrective Action</SectionTitle>
               <div className="space-y-3">
                 <TextArea label="Corrective Action" rows={4} value={draft.corrective_action} onChange={(v) => setDraft({ ...draft, corrective_action: v })} />
-                <AiAssistButton mode="corrective" label="Suggest a corrective action" canRun
-                  context={aiContext(draft)} onUse={(t) => setDraft({ ...draft, corrective_action: t, ai_generated: true })} />
                 <div className="grid grid-cols-2 gap-3">
                   <TextField label="Action Owner" value={draft.corrective_action_owner} onChange={(v) => setDraft({ ...draft, corrective_action_owner: v })} />
                   <TextField label="Close Out Date" type="date" value={draft.corrective_close_out_date} onChange={(v) => setDraft({ ...draft, corrective_close_out_date: v })} />
@@ -660,6 +612,21 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
       case 6:
         return (
           <div className="space-y-4">
+            <div className="rounded-xl border border-teal-500/40 bg-[#0d1b26] p-3 text-sm text-slate-200">
+              <b className="text-teal-400">Please review your report.</b> Read everything below, correct anything that's wrong, and if you agree, tap <b>Approve &amp; continue</b> to send it.
+            </div>
+            {aiDraft.status === "loading" && (
+              <div className="rounded-xl border border-teal-500/30 bg-[#0d1b26] p-3 text-sm text-teal-300 flex items-center gap-2">
+                <Loader2 size={15} className="animate-spin shrink-0" /> Writing up your description…
+              </div>
+            )}
+            {(aiDraft.status === "off" || aiDraft.status === "error" || aiDraft.status === "limit") && (
+              <div className="rounded-xl border border-amber-500/30 bg-[#0d1b26] p-3 text-xs text-amber-300">
+                {aiDraft.status === "limit" ? "Automatic write-up limit reached for this month — please write the description yourself." : "The description couldn't be written automatically — please write it below."}
+              </div>
+            )}
+            <TextArea label="Description" required rows={4} value={draft.description} onChange={(v) => setDraft({ ...draft, description: v })} />
+            <TextArea label="Safety Concern" rows={3} value={draft.safety_concern} onChange={(v) => setDraft({ ...draft, safety_concern: v })} />
             <RiskBar riskRatingKey={draft.risk_rating} />
             {draft.photo_data_url && <img src={draft.photo_data_url} className="w-full h-48 object-cover rounded-xl border border-slate-800" />}
             <div className="bg-[#0d1b26] rounded-xl border border-slate-800 px-4 py-1">
@@ -669,8 +636,6 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
                 ["Company", resolveCompanyName(draft)],
                 ["Subcontractor", draft.subcontractor === "Others" ? draft.subcontractor_other : draft.subcontractor],
                 ["Site / Location", `${draft.site} — ${draft.location}`],
-                ["Description", draft.description],
-                ["Safety Concern", draft.safety_concern],
                 ["Hazard Classification", draft.hazard_classes.join(", ")],
                 ...((draft.life_saving_rules || []).length ? [["Life-Saving Rule Type", draft.life_saving_rules.join(", ")]] : []),
                 ["Risk Rating", draft.risk_rating],
@@ -716,15 +681,15 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
             </button>
           )}
           {step < STEPS.length - 1 ? (
-            <button onClick={() => canNext() && setStep(step + 1)} disabled={!canNext()}
+            <button onClick={() => { if (!canNext()) return; if (step === 4) maybeDraft(); setStep(step + 1); }} disabled={!canNext()}
               className="flex-1 bg-teal-500 hover:bg-teal-600 disabled:opacity-40 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-1">
               Continue <ChevronRight size={18} />
             </button>
           ) : (
-            <button onClick={handleSave} disabled={saving}
+            <button onClick={handleSave} disabled={saving || aiDraft.status === "loading" || !draft.description.trim()}
               className="flex-1 bg-stone-800 hover:bg-stone-900 disabled:opacity-60 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2">
               {saving ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
-              {saving ? "Saving…" : "Save Report"}
+              {saving ? "Saving…" : "Approve & continue"}
             </button>
           )}
         </div>

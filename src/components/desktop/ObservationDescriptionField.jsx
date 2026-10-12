@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import AiAssistButton from "../AiAssistButton";
 import { FIELD_BASE, fieldStyle, LABEL_STYLE, ERROR_TEXT_STYLE } from "./fieldStyles";
 
 const MAX_LENGTH = 2000;
@@ -35,10 +34,6 @@ export default function ObservationDescriptionField({ value, onChange, error, ai
         }}
       />
       {error && <div style={ERROR_TEXT_STYLE}>{error}</div>}
-      {aiContext && (
-        <AiAssistButton mode="description" label="Help me write this" canRun={value.trim().length >= 5}
-          context={{ ...aiContext, description: value }} onUse={(t) => onChange(t.slice(0, MAX_LENGTH))} />
-      )}
     </div>
   );
 }
