@@ -33,6 +33,15 @@ export default function SendPromptView({ profile, pendingSendReport, setPendingS
     return [...new Set([...baseEmails, ...subEmails, ...extra, ...self])];
   }
 
+  // Safety team and subcontractor get separate emails (the sub only sees the
+  // company name and a corrective-action link), so keep the two lists apart.
+  function getSplitRecipients() {
+    const subTo = [...new Set(matchedSubs.flatMap((s) => s.contact_emails || []).map((e) => e.trim()).filter(Boolean))];
+    const subSet = new Set(subTo.map((e) => e.toLowerCase()));
+    const safetyTo = getRecipients().filter((e) => !subSet.has(e.toLowerCase()));
+    return { safetyTo, subTo };
+  }
+
   function getLink() {
     return buildReportEmail(pendingSendReport, profile, subcontractors, [extraEmail.trim(), profile.email].filter(Boolean));
   }
@@ -59,7 +68,7 @@ export default function SendPromptView({ profile, pendingSendReport, setPendingS
       const pdfFilename = `Hazard_Report_${safeLoc}_${pendingSendReport.report_date}.pdf`;
 
       const { data, error } = await supabase.functions.invoke("send-report-email", {
-        body: { to, report: pendingSendReport, profile, pdfBase64, pdfFilename },
+        body: { to, ...getSplitRecipients(), report: pendingSendReport, profile, pdfBase64, pdfFilename },
       });
       if (error || data?.error) {
         showToast && showToast("Couldn't send automatically — try 'Copy Email Content' instead");

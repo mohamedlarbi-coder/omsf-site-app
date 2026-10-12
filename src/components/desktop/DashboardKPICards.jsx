@@ -49,7 +49,7 @@ export default function DashboardKPICards({ totalObservations, onOpenActions }) 
   useEffect(() => {
     supabase.from("action_items").select("id,status,due_date").then(({ data }) => setActions(data || []));
   }, []);
-  const open = actions.filter((a) => a.status === "Open");
+  const open = actions.filter((a) => a.status !== "Closed");
   const overdue = open.filter((a) => a.due_date && new Date(a.due_date) < new Date()).length;
   const closed = actions.length - open.length;
 

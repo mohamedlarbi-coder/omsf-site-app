@@ -14,7 +14,7 @@ export default function DashboardTradeCharts({ reports = [], subcontractors = []
 
   const names = useMemo(() => subcontractors.map((s) => s.name), [subcontractors]);
   const reportData = useMemo(() => countByTrade(names, reports, tradeOfReport), [names, reports]);
-  const openActions = useMemo(() => actions.filter((a) => a.status === "Open"), [actions]);
+  const openActions = useMemo(() => actions.filter((a) => a.status !== "Closed"), [actions]);
   const actionData = useMemo(() => countByTrade(names, openActions, tradeOfAction), [names, openActions]);
 
   return (

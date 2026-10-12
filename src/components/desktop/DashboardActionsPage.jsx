@@ -51,8 +51,8 @@ export default function DashboardActionsPage({ profile, subcontractors = [], set
 
   const byStatus = items.filter((i) => {
     if (filter === "All") return true;
-    if (filter === "Overdue") return i.status === "Open" && i.due_date && new Date(i.due_date) < new Date();
-    return i.status === filter;
+    if (filter === "Overdue") return i.status !== "Closed" && i.due_date && new Date(i.due_date) < new Date();
+    return filter === "Open" ? i.status !== "Closed" : i.status === filter;
   });
   const tradeData = countByTrade(subcontractors.map((s) => s.name), byStatus, tradeOfAction);
   const filtered = trade ? byStatus.filter((i) => tradeOfAction(i) === trade) : byStatus;
@@ -105,7 +105,7 @@ export default function DashboardActionsPage({ profile, subcontractors = [], set
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 22, fontWeight: 650, color: "#F0F4F6" }}>Actions</div>
           <div style={{ fontSize: 12.5, color: "#8997A1", marginTop: 4 }}>
-            {items.filter((i) => i.status === "Open").length} open · {items.filter((i) => i.status === "Closed").length} closed
+            {items.filter((i) => i.status !== "Closed").length} open · {items.filter((i) => i.status === "Closed").length} closed
           </div>
         </div>
 
@@ -179,7 +179,7 @@ export default function DashboardActionsPage({ profile, subcontractors = [], set
                   <div style={{ fontSize: 12, color: "#8997A0" }}>{item.subcontractor || item.owner || "Unassigned"}</div>
                   <div style={{ fontSize: 11.5, color: "#70808B" }}>{item.due_date || "—"}</div>
                   <div style={{ fontSize: 11.5, fontWeight: 600, color: due.color }}>{due.label}</div>
-                  {item.status === "Open" ? (
+                  {item.status !== "Closed" ? (
                     <button
                       onClick={() => setClosingItem(item)}
                       style={{ justifySelf: "end", background: "rgba(24,201,203,0.12)", border: "1px solid rgba(24,201,203,0.3)", color: "#18C9CB", fontSize: 11.5, fontWeight: 600, padding: "6px 12px", borderRadius: 7, cursor: "pointer" }}

@@ -124,7 +124,7 @@ export default function HomeView({ reports, setView, profile, handleLogout, setA
   const [openList, setOpenList] = useState([]);
   const [panel, setPanel] = useState(null); // "bell" | "me" | null
   useEffect(() => {
-    supabase.from("action_items").select("*").eq("status", "Open").order("due_date", { ascending: true, nullsFirst: false })
+    supabase.from("action_items").select("*").neq("status", "Closed").order("due_date", { ascending: true, nullsFirst: false })
       .then(({ data }) => { setOpenList(data || []); setOpenActions((data || []).length); });
   }, []);
   const overdue = openList.filter((a) => a.due_date && new Date(a.due_date) < new Date());

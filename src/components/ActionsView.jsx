@@ -34,8 +34,8 @@ export default function ActionsView({ reports = [], subcontractors = [], setView
   const names = useMemo(() => subcontractors.map((s) => s.name), [subcontractors]);
   const byStatus = useMemo(() => items.filter((i) => {
     if (filter === "All") return true;
-    if (filter === "Overdue") return i.status === "Open" && i.due_date && new Date(i.due_date) < new Date();
-    return i.status === filter;
+    if (filter === "Overdue") return i.status !== "Closed" && i.due_date && new Date(i.due_date) < new Date();
+    return filter === "Open" ? i.status !== "Closed" : i.status === filter;
   }), [items, filter]);
   const actionData = useMemo(() => countByTrade(names, byStatus, tradeOfAction), [names, byStatus]);
   const reportData = useMemo(() => countByTrade(names, reports, tradeOfReport), [names, reports]);

@@ -1,11 +1,14 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
+import ActionPage from './components/ActionPage.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    {/^\/a\/[A-Za-z0-9]+\/?$/.test(window.location.pathname)
+      ? <ActionPage token={window.location.pathname.split('/')[2]} />
+      : <App />}
   </React.StrictMode>,
 )
 

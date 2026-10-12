@@ -195,11 +195,14 @@ export default function App() {
   async function createActionItemsForReport(report) {
     const items = [];
     const subName = report.subcontractor === "Others" ? report.subcontractor_other : report.subcontractor;
-    if (report.corrective_action?.trim()) {
+    // Every real finding gets a Corrective item (so the closed loop and
+    // reminders apply) — not Good Spots or "No Risk" observations.
+    const needsLoop = report.report_type !== "Good Spot" && !/^no risk$/i.test((report.risk_rating || "").trim());
+    if (report.corrective_action?.trim() || needsLoop) {
       items.push({
         report_id: report.id,
         kind: "Corrective",
-        description: report.corrective_action,
+        description: report.corrective_action?.trim() || report.description || "Corrective action required",
         owner: report.corrective_action_owner || "",
         subcontractor: subName || "",
         location: report.location || "",
