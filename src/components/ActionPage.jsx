@@ -11,6 +11,7 @@ const EVENT_LABEL = {
   correction_submitted: "Correction submitted",
   sent_back: "Sent back",
   closed: "Closed · verified",
+  closed_in_person: "Closed in person · verified on site",
   reminder: "Reminder sent",
   escalation_pending: "Escalation flagged",
 };
@@ -105,13 +106,16 @@ function Markup({ src, onChange }) {
   );
 }
 
-function Shell({ children }) {
+function Shell({ children, onBack }) {
   return (
     <div className="min-h-screen bg-[#08131D] text-slate-100 font-sans">
       <div className="bg-[#08131D] border-b-[3px] border-[#18C9CB] py-4 flex justify-center">
         <img src="/branding/email/lockup.png" alt="MINERVIUM" className="h-9" onError={(e) => (e.currentTarget.style.display = "none")} />
       </div>
-      <div className="max-w-xl mx-auto px-4 py-5 space-y-4">{children}</div>
+      <div className="max-w-xl mx-auto px-4 py-5 space-y-4">
+        {onBack && <button onClick={onBack} className="text-sm font-semibold text-teal-300">← Back to report</button>}
+        {children}
+      </div>
     </div>
   );
 }
@@ -142,7 +146,7 @@ function Trail({ events }) {
   );
 }
 
-export default function ActionPage({ token }) {
+export default function ActionPage({ token, actionId, onBack }) {
   const [data, setData] = useState(null);
   const [err, setErr] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -155,7 +159,7 @@ export default function ActionPage({ token }) {
   const [msg, setMsg] = useState("");
 
   async function call(payload) {
-    const { data: d, error } = await supabase.functions.invoke("action-public", { body: { token, ...payload } });
+    const { data: d, error } = await supabase.functions.invoke("action-public", { body: token ? { token, ...payload } : { action_id: actionId, ...payload } });
     if (error) {
       let code = "server_error";
       try { code = (await error.context.json()).error || code; } catch { /* ignore */ }
@@ -167,15 +171,15 @@ export default function ActionPage({ token }) {
     try { setData(await call({ op: "get" })); }
     catch (e) { setErr(e.message); }
   };
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [token]);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [token, actionId]);
 
   if (err) {
     const text = err === "expired" ? "This link has expired." : err === "invalid_link" ? "This link isn't valid." : "Something went wrong. Please try again.";
-    return <Shell><Card><div className="font-bold mb-1">{text}</div><div className="text-sm text-slate-400">Ask the safety team to resend the link.</div></Card></Shell>;
+    return <Shell onBack={onBack}><Card><div className="font-bold mb-1">{text}</div><div className="text-sm text-slate-400">Ask the safety team to resend the link.</div></Card></Shell>;
   }
-  if (!data) return <Shell><div className="text-center text-slate-400 py-10">Loading…</div></Shell>;
+  if (!data) return <Shell onBack={onBack}><div className="text-center text-slate-400 py-10">Loading…</div></Shell>;
 
-  const { role, action, report, events, photoRequired } = data;
+  const { role, action, report, events, photoRequired, canAct } = data;
   const closed = action.status === "Closed";
   const waiting = action.status === "Correction submitted";
   const loc = [report.site, report.location].filter(Boolean).join(" — ");
@@ -212,11 +216,33 @@ export default function ActionPage({ token }) {
 
   const flash = msg && <div className="text-sm font-semibold text-teal-300 bg-teal-500/10 border border-teal-500/30 rounded-xl px-4 py-3">{msg}</div>;
 
+  const correctionForm = (
+          <Card>
+    <div className="font-bold mb-3">{canAct ? "Upload the correction" : "Your correction"}</div>
+    {!rawPhoto ? (
+      <label className="block w-full text-center py-8 rounded-xl border-2 border-dashed border-teal-500/50 text-teal-300 font-semibold cursor-pointer">
+        📷 Take or choose a photo{photoRequired ? "" : " (optional)"}
+        <input type="file" accept="image/*" capture="environment" className="hidden" onChange={onPick} />
+      </label>
+    ) : (
+      <div>
+        <Markup src={rawPhoto} onChange={setMarkedPhoto} />
+        <button type="button" className="text-xs text-slate-400 underline mt-2" onClick={() => { setRawPhoto(null); setMarkedPhoto(null); }}>Remove photo</button>
+      </div>
+    )}
+    <label className="block text-sm text-slate-400 mt-4 mb-1">What was done?</label>
+    <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder="e.g. Harness anchor point installed, crew briefed"
+      className="w-full rounded-xl border border-slate-700 bg-[#08131D] px-3 py-2.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-teal-500" />
+    <button disabled={!canSubmit || busy} onClick={() => run({ op: "submit", note, photo: markedPhoto || rawPhoto || "" }, "Correction sent to the safety team.")}
+      className="w-full mt-4 bg-teal-500 disabled:opacity-50 text-slate-900 font-extrabold py-3.5 rounded-xl">{busy ? "Sending…" : "Send to safety team"}</button>
+  </Card>
+  );
+
   /* ---------- Subcontractor ---------- */
   if (role === "sub") {
     const canSubmit = note.trim().length >= 3 && (!photoRequired || markedPhoto || rawPhoto);
     return (
-      <Shell>
+      <Shell onBack={onBack}>
         {flash}
         {summary}
         {closed ? (
@@ -224,25 +250,7 @@ export default function ActionPage({ token }) {
         ) : waiting ? (
           <Card><div className="font-bold">Correction sent</div><div className="text-sm text-slate-400 mt-1">The safety team is reviewing it. You'll get an email if anything more is needed.</div></Card>
         ) : (
-          <Card>
-            <div className="font-bold mb-3">Your correction</div>
-            {!rawPhoto ? (
-              <label className="block w-full text-center py-8 rounded-xl border-2 border-dashed border-teal-500/50 text-teal-300 font-semibold cursor-pointer">
-                📷 Take or choose a photo{photoRequired ? "" : " (optional)"}
-                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={onPick} />
-              </label>
-            ) : (
-              <div>
-                <Markup src={rawPhoto} onChange={setMarkedPhoto} />
-                <button type="button" className="text-xs text-slate-400 underline mt-2" onClick={() => { setRawPhoto(null); setMarkedPhoto(null); }}>Remove photo</button>
-              </div>
-            )}
-            <label className="block text-sm text-slate-400 mt-4 mb-1">What was done?</label>
-            <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder="e.g. Harness anchor point installed, crew briefed"
-              className="w-full rounded-xl border border-slate-700 bg-[#08131D] px-3 py-2.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-teal-500" />
-            <button disabled={!canSubmit || busy} onClick={() => run({ op: "submit", note, photo: markedPhoto || rawPhoto || "" }, "Correction sent to the safety team.")}
-              className="w-full mt-4 bg-teal-500 disabled:opacity-50 text-slate-900 font-extrabold py-3.5 rounded-xl">{busy ? "Sending…" : "Send to safety team"}</button>
-          </Card>
+          correctionForm
         )}
         <Trail events={events} />
       </Shell>
@@ -252,7 +260,7 @@ export default function ActionPage({ token }) {
   /* ---------- Safety ---------- */
   const lastCorrection = [...events].reverse().find((e) => e.kind === "correction_submitted");
   return (
-    <Shell>
+    <Shell onBack={onBack}>
       {flash}
       {summary}
       {report.corrective_action && <Card><div className="text-xs font-bold uppercase tracking-wide text-teal-400 mb-1">Corrective action requested</div><div className="text-sm">{report.corrective_action}</div></Card>}
@@ -291,6 +299,19 @@ export default function ActionPage({ token }) {
             <button disabled={busy} onClick={() => run({ op: "review", decision: "reviewed" }, "Marked as reviewed.")} className="w-full bg-teal-500 disabled:opacity-50 text-slate-900 font-extrabold py-3.5 rounded-xl">I've reviewed this</button>
           )}
         </Card>
+      )}
+      {canAct && !closed && !waiting && (
+        <>
+          {correctionForm}
+          <Card>
+            <div className="font-bold mb-1">Already resolved on site?</div>
+            <div className="text-sm text-slate-400 mb-3">Spoke with the subcontractor in person? Close it now with a short note.</div>
+            <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={2} placeholder="e.g. Verified on site with the foreman, harness anchor installed"
+              className="w-full rounded-xl border border-slate-700 bg-[#08131D] px-3 py-2.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-teal-500" />
+            <button disabled={busy || comment.trim().length < 3} onClick={() => run({ op: "review", decision: "close", comment }, "Closed in person.")}
+              className="w-full mt-3 border border-teal-500/60 text-teal-300 disabled:opacity-50 font-bold py-3 rounded-xl">Close in person</button>
+          </Card>
+        </>
       )}
       <Trail events={events} />
     </Shell>

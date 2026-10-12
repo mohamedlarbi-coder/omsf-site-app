@@ -23,13 +23,33 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   try {
     const body = await req.json();
-    const { token, op } = body;
-    if (!token || typeof token !== "string") return jsonRes({ error: "bad_request" }, 400);
+    const { token, op, action_id } = body;
+    if (!(typeof token === "string" && token) && !(typeof action_id === "string" && action_id)) return jsonRes({ error: "bad_request" }, 400);
     const sb = admin();
 
-    const { data: link } = await sb.from("action_links").select("role, expires_at, action_id").eq("token", token).maybeSingle();
-    if (!link) return jsonRes({ error: "invalid_link" }, 404);
-    if (new Date(link.expires_at) < new Date()) return jsonRes({ error: "expired" }, 410);
+    let link: { role: string; expires_at: string; action_id: string } | null = null;
+    let appUser: { name: string; email: string } | null = null;
+    if (typeof token === "string" && token) {
+      const { data } = await sb.from("action_links").select("role, expires_at, action_id").eq("token", token).maybeSingle();
+      link = data;
+      if (!link) return jsonRes({ error: "invalid_link" }, 404);
+      if (new Date(link.expires_at) < new Date()) return jsonRes({ error: "expired" }, 410);
+    } else {
+      // In-app access: a signed-in admin or someone on this report's distribution list.
+      const jwt = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+      const { data: u } = await sb.auth.getUser(jwt);
+      const uid = u?.user?.id;
+      const email = (u?.user?.email || "").toLowerCase();
+      if (!uid) return jsonRes({ error: "unauthorized" }, 401);
+      const { data: act } = await sb.from("action_items").select("safety_emails").eq("id", action_id).maybeSingle();
+      if (!act) return jsonRes({ error: "invalid_link" }, 404);
+      const { data: adm } = await sb.from("app_admins").select("user_id").eq("user_id", uid).maybeSingle();
+      const inList = ((act.safety_emails || []) as string[]).some((e) => e.toLowerCase() === email);
+      if (!adm && !inList) return jsonRes({ error: "forbidden" }, 403);
+      const { data: prof } = await sb.from("profiles").select("my_name").eq("id", uid).maybeSingle();
+      appUser = { name: prof?.my_name || email, email };
+      link = { role: "safety", expires_at: "9999-01-01", action_id };
+    }
 
     const { data: action } = await sb.from("action_items").select("*").eq("id", link.action_id).single();
     const { data: rep } = await sb.from("reports").select("*").eq("id", action.report_id).single();
@@ -51,17 +71,18 @@ Deno.serve(async (req) => {
         },
         events: await loadEvents(),
         photoRequired: PHOTO_REQUIRED.includes(rep.report_type),
+        canAct: !!appUser,
       });
     }
 
-    const actor = role === "sub" ? (action.subcontractor || "Subcontractor") : "Safety team";
+    const actor = appUser ? appUser.name : role === "sub" ? (action.subcontractor || "Subcontractor") : "Safety team";
     const addEvent = (kind: string, note = "", photo_url: string | null = null) =>
       sb.from("action_events").insert({ action_id: action.id, kind, note, photo_url, actor });
     const loc = rep.location || "OMSF";
 
     /* ---- Subcontractor submits the correction ---- */
     if (op === "submit") {
-      if (role !== "sub") return jsonRes({ error: "forbidden" }, 403);
+      if (role !== "sub" && !appUser) return jsonRes({ error: "forbidden" }, 403);
       if (action.status === "Closed") return jsonRes({ error: "closed" }, 409);
       const note = String(body.note || "").trim().slice(0, 2000);
       const photo = typeof body.photo === "string" ? body.photo : "";
@@ -121,15 +142,17 @@ Deno.serve(async (req) => {
       if (decision === "close") {
         const evs = await loadEvents();
         const last = [...evs].reverse().find((e) => e.kind === "correction_submitted");
+        const inPerson = !last;
+        if (inPerson && comment.length < 3) return jsonRes({ error: "needs_comment" }, 400);
         await sb.from("action_items").update({
           status: "Closed", closed_at: new Date().toISOString(),
           closure_notes: last?.note || comment || "", closure_photo_url: last?.photo_url || null,
           escalation_pending: false,
         }).eq("id", action.id);
-        await addEvent("closed", comment);
+        await addEvent(inPerson ? "closed_in_person" : "closed", comment);
         const mk = (r: "sub" | "safety") => emailHtml({
           banner: { label: "Closed · verified", text: "The corrective action was verified by the safety team.", tone: "green" },
-          intro: r === "sub" ? "Thank you — this item is now closed." : "This item is now closed.",
+          intro: (r === "sub" ? "Thank you — this item is now closed." : "This item is now closed.") + (inPerson ? ` Verified on site by ${actor}.` : ""),
           rows: reportRows(rep, r),
           imageUrl: last?.photo_url || undefined,
         });

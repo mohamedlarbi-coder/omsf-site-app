@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { supabase } from "../supabaseClient";
+import ActionPage from "./ActionPage";
 import { ChevronLeft, FileDown, FileText, Send, Trash2, Loader2, MapPin } from "lucide-react";
 import { riskBarInfo, buildReportEmail, getDocxLib, compositePinOnMap, REPORT_TYPES, RISK_RATINGS, HAZARD_CLASSES, TRACKING_TYPES, CONTRIBUTING_FACTORS } from "../lib/constants";
 import { previewReportPdf } from "../lib/reportPdf";
@@ -20,8 +22,24 @@ function RiskBar({ riskRatingKey }) {
 export default function DetailView({ profile, activeReport, setView, deleteReport, showToast, subcontractors = [], isDesktop }) {
   const backView = isDesktop ? "observations-desktop" : "log";
   const [exporting, setExporting] = useState(false);
+  // Corrective-action tile: only admins / people on this report's distribution list
+  // (the backend re-checks this; a 403 simply hides the tile).
+  const [loopAction, setLoopAction] = useState(null);
+  const [showLoop, setShowLoop] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
   const r = activeReport;
+  useEffect(() => {
+    let live = true;
+    setLoopAction(null);
+    if (!r?.id) return;
+    (async () => {
+      const { data: it } = await supabase.from("action_items").select("id,status,loop_enabled").eq("report_id", r.id).eq("kind", "Corrective").maybeSingle();
+      if (!live || !it?.loop_enabled) return;
+      const { error } = await supabase.functions.invoke("action-public", { body: { action_id: it.id, op: "get" } });
+      if (live && !error) setLoopAction(it);
+    })();
+    return () => { live = false; };
+  }, [r?.id]);
   if (!r) {
     setView(backView);
     return null;
@@ -237,6 +255,8 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
     }
   }
 
+  if (showLoop && loopAction) return <ActionPage actionId={loopAction.id} onBack={() => setShowLoop(false)} />;
+
   return (
     <div className="min-h-screen bg-[#08131D] font-sans relative">
       <BackgroundWatermark />
@@ -280,6 +300,16 @@ export default function DetailView({ profile, activeReport, setView, deleteRepor
               </div>
             ) : null)}
           </div>
+
+          {loopAction && (
+            <button onClick={() => setShowLoop(true)} className="w-full text-left bg-teal-500/10 hover:bg-teal-500/15 border border-teal-500/40 rounded-xl px-4 py-3.5 flex items-center justify-between">
+              <span>
+                <span className="block text-teal-300 font-bold">Corrective action</span>
+                <span className="block text-xs text-slate-400 mt-0.5">Status: {loopAction.status} · upload a correction or close it</span>
+              </span>
+              <span className="text-teal-300 text-lg">›</span>
+            </button>
+          )}
 
           <div className="flex gap-2 pt-2">
             <button onClick={viewPdf} disabled={exportingPdf} className="flex-1 bg-teal-700 hover:bg-teal-800 disabled:opacity-60 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2">
