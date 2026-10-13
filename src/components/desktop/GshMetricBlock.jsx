@@ -44,6 +44,16 @@ export default function GshMetricBlock({
   narrow = false,
 }) {
   const { rows, totals, grandTotal } = matrix;
+  // First column stays visible while the month columns scroll sideways.
+  const sticky = {
+    position: "sticky",
+    left: 0,
+    zIndex: 2,
+    background: "#0d1b26",
+    minWidth: 128,
+    maxWidth: 128,
+    boxShadow: "1px 0 0 rgba(160,190,204,0.16)",
+  };
   // Only show months up to the last one with data (no empty Sep/Oct columns).
   const shown = currentMonth >= 0 ? currentMonth + 1 : 12;
 
@@ -84,10 +94,10 @@ export default function GshMetricBlock({
       </h3>
 
       <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, minWidth: 150 + shown * 56 + 60 }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, minWidth: 128 + shown * 56 + 60 }}>
           <thead>
             <tr>
-              <th style={{ ...head, textAlign: "left", minWidth: 150 }}>{title}</th>
+              <th style={{ ...head, ...sticky, zIndex: 3, textAlign: "left" }}>{title}</th>
               {MONTH_LABELS.slice(0, shown).map((m) => (
                 <th key={m} style={head}>{m}</th>
               ))}
@@ -97,7 +107,7 @@ export default function GshMetricBlock({
           <tbody>
             {rows.map((r, ri) => (
               <tr key={r.code}>
-                <td style={{ ...cell, textAlign: "left", color: "#D5D8DC" }}>
+                <td style={{ ...cell, ...sticky, textAlign: "left", color: "#D5D8DC" }}>
                   {r.label}
                 </td>
                 {r.values.slice(0, shown).map((v, mi) => (
@@ -112,6 +122,7 @@ export default function GshMetricBlock({
               <td
                 style={{
                   ...cell,
+                  ...sticky,
                   textAlign: "left",
                   borderTop: "1px solid rgba(160,190,204,0.16)",
                   borderBottom: 0,
