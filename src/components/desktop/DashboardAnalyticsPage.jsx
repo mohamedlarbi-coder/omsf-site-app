@@ -233,7 +233,7 @@ export default function DashboardAnalyticsPage({ profile, reports = [], siteMapU
                   firstLive={firstLive}
                   note={
                     firstLive > 0
-                      ? "Who filed the report. Jan–Aug is from the GSH dashboard data; later months fill in once each user's group is recorded in the app."
+                      ? "Who filed the report. Jan–Sep is from the GSH dashboard data; later months fill in once each user's group is recorded in the app."
                       : null
                   }
                 />

@@ -92,9 +92,9 @@ const DOMAIN_SOURCE = {
   [DOMAINS.FACTOR]: { field: "contributing_factors", multi: true, map: FACTOR_CODE_BY_LABEL },
 };
 
-/* Last month (0-based) the GSH charts include. Set to August (7) because no
-   real September/October data exists yet — raise it as real months arrive. */
-export const DATA_THROUGH_MONTH = 7;
+/* Last month (0-based) the GSH charts include. Set to September (8) because no
+   real October data exists yet — raise it as real months arrive. */
+export const DATA_THROUGH_MONTH = 8;
 
 export const MONTH_LABELS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
