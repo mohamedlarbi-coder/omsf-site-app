@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import {
   X, Check, ChevronLeft, ChevronRight, Camera, Image as ImageIcon,
-  AlertTriangle, MapPin, Loader2, ClipboardList,
+  AlertTriangle, MapPin, Loader2, ClipboardList, Mic, MicOff,
 } from "lucide-react";
 import {
   REPORT_TYPES, HAZARD_CLASSES, LIFE_SAVING_RULE, LIFE_SAVING_RULE_TYPES, TRACKING_TYPES, RISK_RATINGS, CONTRIBUTING_FACTORS,
@@ -250,6 +250,53 @@ function SiteMapPicker({ siteMapUrl, pin, onPinChange, gpsStatus }) {
         {gpsStatus === "locating" && <span className="text-teal-400 flex items-center gap-1"><Loader2 size={12} className="animate-spin" /> Locating…</span>}
         {gpsStatus === "located" && <span className="text-emerald-400">GPS pin placed — adjust if needed</span>}
       </div>
+    </div>
+  );
+}
+
+// Dictation via the browser Web Speech API (no server calls). Hidden when unsupported.
+function MicInput({ value, onChange, placeholder, maxLength = 120 }) {
+  const SR = typeof window !== "undefined" ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null;
+  const [listening, setListening] = useState(false);
+  const recRef = useRef(null);
+  const baseRef = useRef("");
+  useEffect(() => () => { try { recRef.current?.abort(); } catch {} }, []);
+  const toggle = () => {
+    if (listening) { try { recRef.current?.stop(); } catch {} return; }
+    const rec = new SR();
+    rec.lang = navigator.language || "en-US";
+    rec.interimResults = true;
+    rec.continuous = false;
+    baseRef.current = value ? value.replace(/\s+$/, "") + " " : "";
+    rec.onresult = (e) => {
+      let t = "";
+      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+      onChange((baseRef.current + t).slice(0, maxLength));
+    };
+    rec.onend = () => setListening(false);
+    rec.onerror = () => setListening(false);
+    recRef.current = rec;
+    try { rec.start(); setListening(true); } catch { setListening(false); }
+  };
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
+        placeholder={placeholder}
+        className="flex-1 min-w-0 px-3 py-2.5 rounded-lg bg-[#08131D] border border-slate-700 text-slate-100 text-sm placeholder-slate-500 focus:outline-none focus:border-teal-400"
+      />
+      {SR && (
+        <button
+          type="button"
+          onClick={toggle}
+          aria-label={listening ? "Stop dictation" : "Dictate"}
+          title={listening ? "Stop" : "Speak"}
+          className={`shrink-0 w-11 h-11 rounded-lg border flex items-center justify-center ${listening ? "bg-red-500/20 border-red-400 text-red-300 animate-pulse" : "bg-[#08131D] border-teal-500/50 text-teal-400 hover:bg-teal-500/10"}`}
+        >
+          {listening ? <MicOff size={18} /> : <Mic size={18} />}
+        </button>
+      )}
     </div>
   );
 }
@@ -517,12 +564,7 @@ export default function FormView({ profile, siteMapUrl, saveReport, setView, sho
             <SectionTitle icon={AlertTriangle}>Description</SectionTitle>
             <div className="rounded-xl border border-teal-500/30 bg-[#0d1b26] p-3 space-y-2">
               <div className="text-xs font-bold uppercase tracking-wide text-teal-400">What did you see? A few words is enough</div>
-              <input
-                value={brief}
-                onChange={(e) => setBrief(e.target.value.slice(0, 120))}
-                placeholder="e.g. worker at height, no harness"
-                className="w-full px-3 py-2.5 rounded-lg bg-[#08131D] border border-slate-700 text-slate-100 text-sm placeholder-slate-500 focus:outline-none focus:border-teal-400"
-              />
+              <MicInput value={brief} onChange={setBrief} placeholder="e.g. worker at height, no harness" />
               <div className="text-xs text-slate-400">
                 Using your photo and these words, the description and safety concern are written for you. You'll review everything before the report is sent.
               </div>
